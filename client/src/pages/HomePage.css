@@ -1,5 +1,5 @@
-.BlogCard {
-    background-color: #3a3f5c; /* Aesthetic dark shade */
+.BlogCards {
+    background-color: #3a3f5c; 
     border-radius: 20px;
     padding: 20px;
     box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.4), -10px -10px 20px rgba(255, 255, 255, 0.1);
@@ -7,13 +7,13 @@
     transition: all 0.3s ease-in-out;
   }
   
-  .BlogCard:hover {
+  .BlogCards:hover {
     box-shadow: 6px 6px 12px rgba(0, 0, 0, 0.5), -6px -6px 12px rgba(255, 255, 255, 0.2);
-    transform: translateY(-5px); /* Slight lift on hover */
-    background-color: #4b506e; /* Lighter hover background */
+    transform: translateY(-5px); 
+    background-color: #4b506e; 
   }
   
-  .BlogCard img {
+  .BlogCards img {
     width: 100%;
     height: 200px;
     object-fit: cover;
@@ -21,20 +21,20 @@
     margin-bottom: 15px;
   }
   
-  .BlogCard h3 {
+  .BlogCards h3 {
     font-size: 1.5rem;
     font-weight: bold;
     color: #ffffff;
     margin-bottom: 10px;
   }
   
-  .BlogCard p {
+  .BlogCards p {
     font-size: 1rem;
     color: #d1d1d1;
     margin-bottom: 15px;
   }
   
-  .BlogCard button {
+  .BlogCards button {
     background-color: #5e81ac;
     color: white;
     border: none;
@@ -45,7 +45,7 @@
     box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -4px -4px 8px rgba(255, 255, 255, 0.1);
   }
   
-  .BlogCard button:hover {
+  .BlogCards button:hover {
     background-color: #4c699f;
     transform: scale(1.1);
   }

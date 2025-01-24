@@ -195,3 +195,10 @@
   color: #ffffff; 
   transform: translateY(-3px); 
 }
+
+.navbar .MuiAvatar-root {
+  margin-right: 10px;
+  cursor: pointer;
+  width: 40px; /* Ensure the avatar size is reasonable */
+  height: 40px; /* Match width */
+}
