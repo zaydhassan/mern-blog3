@@ -1,0 +1,18 @@
+
+.navbar-toolbar {
+    justify-content: space-between; 
+    width: 100%;
+}
+
+.nav-center {
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    flex-grow: 1; 
+}
+
+.nav-item {
+    padding: 10px 20px; 
+    margin: 0 10px; 
+    text-transform: uppercase; 
+}

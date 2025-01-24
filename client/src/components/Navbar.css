@@ -1,0 +1,197 @@
+.navbar.light {
+  background-color: #fff; 
+  color: #2b2e4a; 
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+}
+
+.navbar.light .MuiTypography-root {
+  font-size: 1.9rem; 
+  font-weight: bolder;
+  color: #2b344a; 
+  cursor: pointer;
+}
+
+.navbar.light .MuiTypography-root:hover {
+  color: #fff; 
+}
+
+.navbar.light .MuiButton-root {
+  font-size: 1.2rem; 
+  font-weight: 500; 
+  color: #2b2e4a; 
+  text-transform: none;
+  margin: 0 10px;
+  transition: color 0.3s, background-color 0.3s;
+}
+
+.navbar.light .MuiButton-root:hover {
+  color: #ffffff; 
+  background-color: #5e81ac; 
+  border-radius: 5px;
+}
+
+.navbar.light .MuiIconButton-root {
+  color: #2b2e4a; 
+  margin-right: 10px;
+}
+
+.navbar.light .MuiIconButton-root:hover {
+  color: #5e81ac;
+}
+
+.navbar.light .MuiButton-contained {
+  background-color: #5e81ac; 
+  color: #ffffff; 
+  padding: 5px 15px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.navbar.light .MuiButton-contained:hover {
+  background-color: #4c699f; 
+}
+
+.navbar.dark {
+  background-color: #121212;
+  color: #ffffff; 
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2); 
+}
+
+.navbar.dark .MuiTypography-root {
+  font-size: 1.9rem; 
+  font-weight: bold;
+  color: #ffffff; 
+  cursor: pointer;
+}
+
+.navbar.dark .MuiTypography-root:hover {
+  color: #5e81ac; 
+}
+
+.navbar.dark .MuiButton-root {
+  font-size: 1.2rem; 
+  font-weight: 500; 
+  color: #ffffff; 
+  text-transform: none; 
+  margin: 0 10px;
+  transition: color 0.3s, background-color 0.3s;
+}
+
+.navbar.dark .MuiButton-root:hover {
+  color: #121212;
+  background-color: #5e81ac; 
+  border-radius: 5px;
+}
+
+.navbar.dark .MuiIconButton-root {
+  color: #ffffff; 
+  margin-right: 10px;
+}
+
+.navbar.dark .MuiIconButton-root:hover {
+  color: #5e81ac; 
+}
+
+.navbar.dark .MuiButton-contained {
+  background-color: #5e81ac; 
+  color: #ffffff;
+  padding: 5px 15px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.navbar.dark .MuiButton-contained:hover {
+  background-color: #4c699f; 
+}
+
+.navbar {
+  animation: fadeIn 0.8s ease-in-out; 
+}
+
+.navbar .MuiTypography-root {
+  font-size: 1.9rem;
+  font-weight: bold;
+  color: inherit;
+  cursor: pointer;
+  transition: transform 0.5s ease;
+}
+
+.navbar .MuiTypography-root:hover {
+  transform: scale(1.1) translateY(-5px);
+}
+
+.navbar .MuiButton-root {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: inherit;
+  text-transform: none;
+  margin: 0 10px;
+  transition: background-color 0.5s ease, transform 0.3s ease;
+}
+
+.navbar .MuiButton-root:hover {
+  background-color: #5e81ac;
+  color: #ffffff;
+  transform: translateY(-5px);
+}
+
+.navbar .MuiIconButton-root {
+  color: inherit;
+  transition: transform 0.3s ease;
+}
+
+.navbar .MuiIconButton-root:hover {
+  transform: rotate(45deg);
+}
+
+.navbar .MuiButton-contained {
+  background-color: #5e81ac;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 25px;
+  transition: background-color 0.5s ease, transform 0.5s ease;
+}
+
+.navbar .MuiButton-contained:hover {
+  background-color: #4c699f;
+  transform: scale(1.1);
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.navbar .MuiButton-contained {
+  background-color: #ffffff; 
+  color: #5e81ac; 
+  border: 2px solid #5e81ac; 
+  font-weight: bold;
+  border-radius: 10px; 
+  padding: 10px 20px;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+}
+
+.navbar .MuiButton-contained:hover {
+  background-color: #5e81ac; 
+  color: #ffffff; 
+  transform: translateY(-3px); 
+}
