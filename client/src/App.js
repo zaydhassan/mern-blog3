@@ -15,6 +15,7 @@ import BlogDetails from "./pages/BlogDetails";
 import { Toaster } from "react-hot-toast";
 import 'react-toastify/dist/ReactToastify.css';
 import Contact from "./pages/Contact"; 
+import About from './pages/About';
 
 function AppWrapper() {
   const { theme } = useTheme();
@@ -43,6 +44,7 @@ function AppWrapper() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/about" element={<About />} />
       </Routes>
     </MuiThemeProvider>
   );

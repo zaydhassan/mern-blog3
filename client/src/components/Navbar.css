@@ -199,6 +199,18 @@
 .navbar .MuiAvatar-root {
   margin-right: 10px;
   cursor: pointer;
-  width: 40px; /* Ensure the avatar size is reasonable */
-  height: 40px; /* Match width */
+  width: 40px; 
+  height: 40px; 
 }
+
+.navbar.light .MuiButton-root.active, .navbar.light .MuiTypography-root.active {
+  color: #EB5406; 
+  border-bottom: 4px solid #EB5406; 
+}
+
+.navbar.dark .MuiButton-root.active, .navbar.dark .MuiTypography-root.active {
+  color: #0ef; 
+  border-bottom: 4px solid #0ef; 
+}
+
+
