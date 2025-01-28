@@ -10,8 +10,8 @@ const StyledFormBox = styled(Box)(({ theme }) => ({
   width: "50%", 
   border: "none",
   borderRadius: "20px",
-  padding: theme.spacing(2),
-  margin: `${theme.spacing(-4)} auto ${theme.spacing(2)} auto`,
+  padding: theme.spacing(3),
+  margin: `${theme.spacing(-5)} auto ${theme.spacing(2)} auto`,
   display: "flex",
   flexDirection: "column",
   backgroundColor: theme.palette.background.paper,
@@ -26,8 +26,8 @@ const CreateBlog = () => {
   const navigate = useNavigate();
   const id = localStorage.getItem("userId");
   const [inputs, setInputs] = useState({ title: "", description: "", image: "" });
-  const [uploadedImage, setUploadedImage] = useState(null); // New state for uploaded image
-  const [useImageUrl, setUseImageUrl] = useState(true); // Toggle between URL and upload
+  const [uploadedImage, setUploadedImage] = useState(null); 
+  const [useImageUrl, setUseImageUrl] = useState(true); 
   const quillRef = useRef(null);
   const quillEditor = useRef(null);
 
@@ -57,7 +57,7 @@ const CreateBlog = () => {
     const payload = {
       title: inputs.title,
       description: inputs.description,
-      image: useImageUrl ? inputs.image : uploadedImage, // Choose based on user selection
+      image: useImageUrl ? inputs.image : uploadedImage, 
       user: id,
     };
 

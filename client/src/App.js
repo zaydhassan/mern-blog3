@@ -16,6 +16,7 @@ import { Toaster } from "react-hot-toast";
 import 'react-toastify/dist/ReactToastify.css';
 import Contact from "./pages/Contact"; 
 import About from './pages/About';
+import Profile from './pages/Profile';
 
 function AppWrapper() {
   const { theme } = useTheme();
@@ -45,6 +46,8 @@ function AppWrapper() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/register" element={<Register />} />
         <Route path="/about" element={<About />} />
+        <Route path="/Profile" element={<Profile />} />
+       
       </Routes>
     </MuiThemeProvider>
   );

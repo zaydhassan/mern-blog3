@@ -8,8 +8,8 @@ dotenv.config();
 
 const userRoutes = require("./routes/userRoutes");
 const blogRoutes = require('./routes/blogRoutes');
-const commentRoutes = require('./routes/commentRoutes'); // Ensure this path is correct
-const likeRoutes = require('./routes/likeRoutes');       // Ensure this path is correct
+const commentRoutes = require('./routes/commentRoutes'); 
+const likeRoutes = require('./routes/likeRoutes');       
 
 connectDB();
 
