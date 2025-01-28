@@ -22,7 +22,8 @@ app.use(morgan("dev"));
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/comments", commentRoutes); 
-app.use("/api/v1/likes", likeRoutes);       
+app.use("/api/v1/likes", likeRoutes); 
+app.use("/uploads", express.static("uploads"));
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

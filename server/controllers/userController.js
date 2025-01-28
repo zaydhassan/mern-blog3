@@ -1,5 +1,32 @@
 const userModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
+const multer = require("multer");
+const path = require("path");
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); // Save to 'uploads' directory
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
+    cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage: storage });
+
+exports.uploadImage = (req, res) => {
+  if (!req.file) {
+    return res.status(400).send({ success: false, message: "No file uploaded" });
+  }
+
+  const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+  return res.status(200).send({
+    success: true,
+    message: "Image uploaded successfully",
+    imageUrl,
+  });
+};
 exports.registerController = async (req,res) =>{
   try {
   const {username,email,password,role,bio,profile_image} = req.body
@@ -42,12 +69,19 @@ exports.registerController = async (req,res) =>{
 
 exports.updateUser = async (req, res) => {
   const { userId } = req.params;
-  const { username, email, bio, profile_image } = req.body;
+  const { username, email, bio, profile_image, password } = req.body;
 
   try {
+    const updatedFields = { username, email, bio, profile_image };
+
+    if (password && password.trim() !== "") {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updatedFields.password = hashedPassword;
+    }
+
     const updatedUser = await userModel.findByIdAndUpdate(
       userId,
-      { username, email, bio, profile_image },
+      updatedFields,
       { new: true }
     ).select('_id username email bio profile_image'); 
 
