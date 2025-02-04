@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, InputLabel, TextField, Typography, styled, useTheme } from "@mui/material";
+import { Box, Button, InputLabel, TextField, Typography, Select, MenuItem, styled, useTheme } from "@mui/material";
 import toast from "react-hot-toast";
 import 'quill/dist/quill.snow.css'; 
 import Quill from 'quill';
@@ -11,7 +11,7 @@ const StyledFormBox = styled(Box)(({ theme }) => ({
   border: "none",
   borderRadius: "20px",
   padding: theme.spacing(3),
-  margin: `${theme.spacing(-5)} auto ${theme.spacing(2)} auto`,
+  margin: `${theme.spacing(4)} auto ${theme.spacing(1)} auto`,
   display: "flex",
   flexDirection: "column",
   backgroundColor: theme.palette.background.paper,
@@ -21,11 +21,13 @@ const StyledFormBox = styled(Box)(({ theme }) => ({
   transition: "all 0.3s ease-in-out"
 }));
 
+const categories = ['Technology', 'Education', 'Health', 'Entertainment', 'Food', 'Business', 'Social Media', 'Travel', 'News'];
+
 const CreateBlog = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const id = localStorage.getItem("userId");
-  const [inputs, setInputs] = useState({ title: "", description: "", image: "" });
+  const [inputs, setInputs] = useState({ title: "", description: "", image: "", category: ""});
   const [uploadedImage, setUploadedImage] = useState(null); 
   const [useImageUrl, setUseImageUrl] = useState(true); 
   const quillRef = useRef(null);
@@ -40,8 +42,8 @@ const CreateBlog = () => {
   }, []);
 
   const handleChange = (e) => {
-    setInputs(prevInputs => ({ ...prevInputs, [e.target.name]: e.target.value }));
-  };
+    setInputs({ ...inputs, [e.target.name]: e.target.value });
+};
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -58,6 +60,7 @@ const CreateBlog = () => {
       title: inputs.title,
       description: inputs.description,
       image: useImageUrl ? inputs.image : uploadedImage, 
+      category: inputs.category,
       user: id,
     };
 
@@ -86,13 +89,26 @@ const CreateBlog = () => {
       justifyContent: 'center'
     }}>
       <StyledFormBox>
-        <Typography variant="h5" textAlign="center" fontWeight="bold" paddingBottom={1} color={theme.palette.text.primary}>
+        <Typography variant="h5" textAlign="center" fontWeight="bold" paddingBottom={0} paddingTop={0} color={theme.palette.text.primary}>
           Create A Blog
         </Typography>
         <InputLabel sx={{ mb: 1, fontSize: "14px", fontWeight: "medium", color: theme.palette.text.primary }}>Title</InputLabel>
         <TextField name="title" value={inputs.title} onChange={handleChange} variant="outlined" required size="small" InputLabelProps={{ style: { color: theme.palette.text.primary } }} inputProps={{ style: { color: theme.palette.text.primary } }} />
         <InputLabel sx={{ mb: 1, fontSize: "14px", fontWeight: "medium", color: theme.palette.text.primary }}>Description</InputLabel>
         <div ref={quillRef} style={{ height: '150px', marginBottom: 1 }} />
+        <InputLabel sx={{ mb: 1, fontSize: "14px", fontWeight: "medium", color: theme.palette.text.primary }}>Category</InputLabel>
+        <Select
+          name="category"
+          value={inputs.category}
+          onChange={handleChange}
+          displayEmpty
+          fullWidth
+          required
+        >
+          {categories.map((category, index) => (
+            <MenuItem key={index} value={category}>{category}</MenuItem>
+          ))}
+        </Select>
         <InputLabel sx={{ mb: 1, fontSize: "14px", fontWeight: "medium", color: theme.palette.text.primary }}>
           Choose Image Source
         </InputLabel>

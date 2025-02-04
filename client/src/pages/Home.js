@@ -8,7 +8,7 @@ const BlogGrid = styled(Box)(({ theme }) => ({
   padding: theme.spacing(2),
 }));
 
-const BlogCards = styled(Box)(({ theme }) => ({
+const Blogdummy = styled(Box)(({ theme }) => ({
   backgroundColor: '#AFEEEE',
   padding: '15px',
   borderRadius: '10px',
@@ -42,12 +42,12 @@ const Home = () => {
     </div>
       <BlogGrid>
         {blogs.map(blog => (
-          <BlogCards key={blog.id}>
+          <Blogdummy key={blog.id}>
             <img src={blog.image} alt={blog.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
             <h3>{blog.title}</h3>
             <p>{blog.summary}</p>
            
-          </BlogCards>
+          </Blogdummy>
         ))}
       </BlogGrid>
     </>

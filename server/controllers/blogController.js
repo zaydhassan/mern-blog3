@@ -2,6 +2,40 @@ const blogModel = require("../models/blogModel");
 const userModel = require("../models/userModel");
 const mongoose= require("mongoose");
 
+exports.getTrendingBlogs = async (req, res) => {
+  try {
+    const trendingBlogs = await blogModel.find()
+      .sort({ likes: -1, views: -1, "comments.length": -1 }) 
+      .limit(5) 
+      .populate("user", "username profile_image"); 
+
+    return res.status(200).json({ success: true, trending: trendingBlogs });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching trending blogs", error });
+  }
+};
+
+exports.getRecommendedBlogs = async (req, res) => {
+  const { userId } = req.params;
+  
+  try {
+    
+    const userActivityBlogs = await blogModel.find({
+      $or: [{ likes: userId }, { "comments.user": userId }],
+    }).limit(5);
+
+    let recommendedBlogs = userActivityBlogs;
+
+    if (recommendedBlogs.length === 0) {
+      recommendedBlogs = await blogModel.find().sort({ created_at: -1 }).limit(5);
+    }
+
+    return res.status(200).json({ success: true, recommendations: recommendedBlogs });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching recommended blogs", error });
+  }
+};
+
 exports.getAllBlogsController = async (req, res) => {
     try {
       const blogs = await blogModel.find({}).populate("user");
@@ -27,11 +61,25 @@ exports.getAllBlogsController = async (req, res) => {
     }
   };
 
+  exports.getBlogsByCategory = async (req, res) => {
+    const category = req.params.category;
+    try {
+        const blogs = await blogModel.find({ category: category }).populate('user');
+        if (blogs.length > 0) {
+            res.status(200).json({ success: true, blogs });
+        } else {
+            res.status(404).json({ success: false, message: 'No blogs found for this category' });
+        }
+    } catch (error) {
+        console.error("Error fetching blogs by category:", error);
+        res.status(500).json({ success: false, message: "Error fetching blogs by category", error: error.toString() });
+    }
+};
 
 exports.createBlogController = async(req,res) => {
     try {
-      const { title, description, image, status = 'Draft', user } = req.body; 
-        if(!title || !description || !image || !user) {
+      const { title, description, image,category, status = 'Draft', user } = req.body; 
+        if(!title || !description || !image || !category  || !user) {
             return res.status(400).send({
                 success: false,
                 message: "Please Provide all fields",
@@ -44,7 +92,7 @@ exports.createBlogController = async(req,res) => {
             message:'unable to find user',
         });
      }
-        const newBlog = new blogModel({title, description,image, user,status: status || 'Draft', views: 0});
+        const newBlog = new blogModel({title, description,image,category, user,status: status || 'Draft', views: 0});
         const session = await mongoose.startSession();
     session.startTransaction();
     await newBlog.save({ session });

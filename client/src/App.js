@@ -47,7 +47,8 @@ function AppWrapper() {
         <Route path="/register" element={<Register />} />
         <Route path="/about" element={<About />} />
         <Route path="/Profile" element={<Profile />} />
-       
+        <Route path="/category/:category" element={<Blogs />} />
+        
       </Routes>
     </MuiThemeProvider>
   );

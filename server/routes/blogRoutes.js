@@ -6,6 +6,9 @@ const {
   getBlogByIdController,
   deleteBlogController,
   userBlogController,
+  getTrendingBlogs,      
+  getRecommendedBlogs, 
+  getBlogsByCategory
 } = require("../controllers/blogController");
 
 const blogController = require("../controllers/blogController");
@@ -23,5 +26,12 @@ router.get("/user-drafts/:userId", blogController.getUserDrafts);
 
 router.delete("/delete-blog/:id", deleteBlogController);
 
-router.get('/user-blog/:id',userBlogController)
+router.get('/user-blog/:id',userBlogController);
+
+router.get("/trending", getTrendingBlogs);
+
+router.get("/recommendations/:userId", getRecommendedBlogs);
+
+router.get('/category/:category', blogController.getBlogsByCategory);
+
 module.exports = router;

@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import { updateUser, authActions } from '../redux/store';
 import { useTheme } from '../context/ThemeContext';
 import toast from "react-hot-toast";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import ArticleIcon from '@mui/icons-material/Article';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 
 const Profile = () => {
   const user = useSelector(state => state.auth.user);
@@ -87,27 +90,33 @@ const Profile = () => {
   return (
     <Box display="flex" height="100vh">
       <Box
-        width="240px"
-        p={2}
-        sx={{
-          bgcolor: theme === 'dark' ? '#333' : '#F0F0F0',
-          color: theme === 'dark' ? '#fff' : '#000',
-          minHeight: "100vh"
-        }}
+  width="240px"
+  p={2}
+  sx={{
+    bgcolor: theme === 'dark' ? '#1E1E1E' : '#E3F2FD',
+    color: theme === 'dark' ? '#ffffff' : '#000000',
+    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+  }}
       >
         <List>
           <ListItem disablePadding>
             <ListItemButton onClick={() => navigate('/profile')}>
-              <ListItemText primary="Profile" sx={{ color: 'inherit' }} />
+            <AccountCircleIcon sx={{ marginRight: 1, color: 'inherit' }} />
+            <ListItemText primary="Profile" sx={{ color: 'inherit' }} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton onClick={() => navigate('/my-blogs')}>
+            <ArticleIcon sx={{ marginRight: 1, color: 'inherit' }} />
               <ListItemText primary="My Blogs" sx={{ color: 'inherit' }} />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton onClick={() => navigate('/create-blog')}>
+            <AddCircleIcon sx={{ marginRight: 1, color: 'inherit' }} />
               <ListItemText primary="Create Blog" sx={{ color: 'inherit' }} />
             </ListItemButton>
           </ListItem>

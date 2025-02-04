@@ -1,102 +1,82 @@
-import * as React from "react";
-import Card from "@mui/material/Card";
-import CardHeader from "@mui/material/CardHeader";
-import CardMedia from "@mui/material/CardMedia";
-import CardContent from "@mui/material/CardContent";
-import Avatar from "@mui/material/Avatar";
-import Typography from "@mui/material/Typography";
-import { red } from "@mui/material/colors";
-import ModeEditIcon from "@mui/icons-material/ModeEdit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { Box, IconButton } from "@mui/material";
+import React from "react";
+import { Card,CardMedia,Typography, Box,Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
-import axios from "axios";
-import { FacebookShareButton, TwitterShareButton, LinkedinShareButton } from 'react-share';
+import { motion } from "framer-motion";
 
-export default function BlogCard({
-  title,
-  description,
-  image,
-  username,
-  time,
-  id,
-  isUser,
-}) {
+const BlogCard = ({ id, title, description, image, username, time }) => {
   const navigate = useNavigate();
 
-  const handleEdit = () => {
-    navigate(`/blog-details/${id}`);
-  };
-
-  const handleDelete = async () => {
-    try {
-      const { data } = await axios.delete(`/api/v1/blog/delete-blog/${id}`);
-      if (data?.success) {
-        toast.success("Blog Deleted");
-        navigate("/my-blogs");
-        window.location.reload();
-      } else {
-        toast.error(data.message || "Failed to delete blog"); // Use server-provided message if available
-      }
-    } catch (error) {
-      console.error(error.response ? error.response.data : error);
-      toast.error("Failed to delete blog");
-    }
-  };
-
-  const url = window.location.href; 
-  
   return (
-    <Card
-      sx={{
-        width: "40%",
-        margin: "auto",
-        mt: 2,
-        padding: 2,
-        boxShadow: "5px 5px 10px #ccc",
-        ":hover:": {
-          boxShadow: "10px 10px 20px #ccc",
-        },
-      }}
+    <motion.div 
+      whileHover={{ scale: 1.02 }} 
+      transition={{ duration: 0.3 }}
+      style={{ margin: "1rem", flex: "1 0 45%" }} // Controls layout to fit 2 cards in a row
     >
-      {isUser && (
-        <Box display={"flex"}>
-          <IconButton onClick={handleEdit} sx={{ marginLeft: "auto" }}>
-            <ModeEditIcon color="info" />
-          </IconButton>
-          <IconButton onClick={handleDelete}>
-            <DeleteIcon color="error" />
-          </IconButton>
+      <Card
+        sx={{
+          width: "100%",
+          position: 'relative',
+          border: "1px solid #ffffff40", 
+        '&:hover': {
+          boxShadow: '0px 0px 20px #fff' 
+        },
+        borderRadius: '10px',
+          cursor: "pointer",
+          overflow: 'hidden',
+          "&:hover .contentOverlay": { 
+            opacity: 1, 
+            visibility: 'visible'
+          },
+          "&:hover .image": {
+            transform: 'scale(1.1)'
+          }
+        }}
+        onClick={() => navigate(`/blog-details/${id}`)}
+      >
+        <CardMedia
+          component="img"
+          className="image"
+          image={image}
+          alt={title}
+          sx={{
+            height: 300,
+            objectFit: 'cover',
+            transition: 'transform 0.3s ease-in-out'
+          }}
+        />
+        <Box className="contentOverlay" sx={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          right: 0,
+          left: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          color: 'white',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 2,
+          opacity: 0,
+          visibility: 'hidden',
+          transition: 'opacity 0.5s ease, visibility 0.5s ease'
+        }}>
+          <Typography variant="h5" fontWeight="bold" sx={{ textAlign: 'center', mb: 2 }}>
+            {title}
+          </Typography>
+          <Typography sx={{ mb: 2, px: 2, textAlign: 'center' }}>
+            {description.length > 100 ? `${description.substring(0, 100)}...` : description}
+          </Typography>
+          <Button variant="contained" onClick={(e) => {
+            e.stopPropagation(); 
+            navigate(`/blog-details/${id}`);
+          }}>
+            Read More
+          </Button>
         </Box>
-      )}
-      <CardHeader
-        avatar={
-          <Avatar sx={{ bgcolor: red[500] }} aria-label="recipe">
-            {username}
-          </Avatar>
-        }
-        title={username}
-        subheader={time}
-      />
-      <CardMedia component="img" height="194" image={image} alt={title} />
-      <CardContent>
-        <Typography variant="h6" color="text.secondary">
-          Title : {title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Description : {description}
-        </Typography>
-        <FacebookShareButton url={`${url}/${id}`} style={{ marginRight: "10px" }}>
-          Share on Facebook
-        </FacebookShareButton>
-        <TwitterShareButton url={`${url}/${id}`} style={{ marginRight: "10px" }}>
-          Share on Twitter
-        </TwitterShareButton>
-        <LinkedinShareButton url={`${url}/${id}`}>
-          Share on LinkedIn
-        </LinkedinShareButton>
-      </CardContent>
-    </Card>
+      </Card>
+    </motion.div>
   );
-}
+};
+
+export default BlogCard;
