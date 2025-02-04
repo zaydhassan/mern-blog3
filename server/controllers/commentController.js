@@ -19,7 +19,7 @@ exports.createComment = async (req, res) => {
 exports.getCommentsByBlog = async (req, res) => {
   const { blogId } = req.params;
   try {
-    const comments = await Comment.find({ blog_id: blogId }).populate("user_id", "username");
+    const comments = await Comment.find({ blog_id: blogId }).populate('user_id', 'username');
     res.status(200).send({ success: true, comments });
   } catch (error) {
     res.status(500).send({ success: false, message: "Failed to retrieve comments", error });

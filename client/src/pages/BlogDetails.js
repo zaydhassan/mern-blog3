@@ -1,94 +1,116 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import toast from "react-hot-toast";
-import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
   Typography,
   Avatar,
   IconButton,
-  CircularProgress,
-  Button,
+  Badge,
+  Drawer,
   TextField,
+  Button,
+  Divider,
 } from "@mui/material";
-import { Favorite, FavoriteBorder, Share, Comment, Close } from "@mui/icons-material";
-import { FacebookShareButton, TwitterShareButton, LinkedinShareButton } from "react-share";
+import { Favorite, FavoriteBorder, Share, Comment } from "@mui/icons-material";
+import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import moment from "moment";
 
 const BlogDetails = () => {
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
-  const [recommendedBlogs, setRecommendedBlogs] = useState([]);
   const { id } = useParams();
-  const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchBlogDetails = async () => {
       try {
         const { data } = await axios.get(`/api/v1/blog/get-blog/${id}`);
-        if (data?.success) {
-          setBlog(data?.blog);
-          setComments(data?.blog?.comments || []);
-          setLiked(data?.blog?.liked);
+        if (data.success) {
+          setBlog(data.blog);
+          setComments(data.blog.comments || []);
+          setLiked(data.blog.liked);
+          setLikeCount(data.blog.likes?.length || 0);
           setLoading(false);
         }
       } catch (error) {
-        console.log(error);
+        toast.error("Failed to fetch blog details.");
       }
     };
-    
-    setTimeout(() => {
-      fetchBlogDetails();
-      setRecommendedBlogs([
-        {
-          _id: "1",
-          title: "How AI is Changing the World",
-          image: "https://source.unsplash.com/400x250/?ai,technology",
-        },
-        {
-          _id: "2",
-          title: "10 Tips to Improve Your Coding Skills",
-          image: "https://source.unsplash.com/400x250/?coding,development",
-        },
-      ]);
-    }, 2000);
+    fetchBlogDetails();
   }, [id]);
 
   const handleLike = async () => {
     try {
-      const { data } = await axios.post(`/api/v1/blog/like/${id}`);
-      if (data?.success) {
+      const { data } = await axios.post(`/api/v1/likes`, { blog_id: id });
+      if (data.success) {
         setLiked(!liked);
+        setLikeCount(liked ? likeCount - 1 : likeCount + 1);
         toast.success(liked ? "Like removed!" : "Liked!");
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Error updating like");
     }
   };
 
   const handleComment = async () => {
-    if (!newComment) return;
+    if (!newComment) {
+      toast.error("Please write a comment before posting.");
+      return;
+    }
+    let currentUser = user;
+    if (!currentUser) {
+      const storedUser = localStorage.getItem('user');
+      currentUser = storedUser ? JSON.parse(storedUser) : null;
+    }
+  
+    if (!currentUser || !currentUser.username) {
+      toast.error("User data not available.");
+      return;
+    }
+  
+    const formattedDate = moment().format("MMM DD");
+  
     try {
-      const { data } = await axios.post(`/api/v1/blog/comment/${id}`, { comment: newComment });
-      if (data?.success) {
-        setComments([...comments, { text: newComment }]);
+      const { data, status } = await axios.post(`/api/v1/comments`, {
+        content: newComment,
+        blog_id: id,
+      });
+  
+      if (status === 201 && data) {
+        setComments([
+          ...comments,
+          {
+            text: newComment,
+            user: {
+              username: currentUser.username,
+              avatar: currentUser.profile_image || "",
+            },
+            date: formattedDate,
+          },
+        ]);
         setNewComment("");
         toast.success("Comment added!");
+      } else {
+        toast.error("Unexpected response format.");
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error.response?.data?.message || "Error adding comment");
     }
+  };
+  
+  const toggleComments = () => {
+    setCommentsOpen((prev) => !prev);
   };
 
   if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-        <CircularProgress size={60} />
-      </Box>
-    );
+    return <Typography>Loading...</Typography>;
   }
 
   return (
@@ -104,19 +126,23 @@ const BlogDetails = () => {
           marginBottom: "20px",
         }}
       />
-
-      <Box display="flex" alignItems="center" justifyContent="space-between">
+      <Box display="flex" justifyContent="space-between">
         <Box display="flex" alignItems="center" gap={2}>
-          <Avatar sx={{ width: 40, height: 40 }}>{blog?.user?.username?.charAt(0)}</Avatar>
+          <Avatar sx={{ width: 40, height: 40 }} src={blog?.user?.profile_image || ""}>
+            {blog?.user?.username?.charAt(0)}
+          </Avatar>
           <Typography variant="h6">{blog?.user?.username}</Typography>
           <Typography variant="body2" color="gray">
             {new Date(blog?.createdAt).toDateString()}
           </Typography>
         </Box>
-
         <Box display="flex" gap={2}>
-          <IconButton onClick={handleLike}>{liked ? <Favorite color="error" /> : <FavoriteBorder />}</IconButton>
-          <IconButton onClick={() => setCommentsOpen(true)}>
+          <IconButton onClick={handleLike}>
+            <Badge badgeContent={likeCount} color="primary">
+              {liked ? <Favorite color="error" /> : <FavoriteBorder />}
+            </Badge>
+          </IconButton>
+          <IconButton onClick={toggleComments}>
             <Comment />
           </IconButton>
           <IconButton>
@@ -125,17 +151,119 @@ const BlogDetails = () => {
         </Box>
       </Box>
 
-      <Typography variant="h4" fontWeight="bold" marginTop={3}>{blog?.title}</Typography>
-      <Typography variant="body1" marginTop={2} color="gray">{blog?.description}</Typography>
+      <Typography variant="h4" fontWeight="bold" marginTop={3}>
+        {blog?.title}
+      </Typography>
+      <Typography variant="body1" marginTop={2} color="gray">
+        {blog?.description}
+      </Typography>
 
-      <Box display="flex" gap={2} marginTop={3}>
-        {recommendedBlogs.map((recBlog) => (
-          <Box key={recBlog._id} onClick={() => navigate(`/blog-details/${recBlog._id}`)} sx={{ cursor: "pointer", textAlign: "center" }}>
-            <img src={recBlog.image} alt={recBlog.title} width="150" height="100" style={{ borderRadius: "10px" }} />
-            <Typography variant="subtitle2" marginTop={1}>{recBlog.title}</Typography>
+      <Drawer
+        anchor="right"
+        open={commentsOpen}
+        onClose={toggleComments}
+        sx={{ width: 400 }}
+      >
+        <Box
+          width={400}
+          padding={2}
+          display="flex"
+          flexDirection="column"
+          sx={{
+            background: "rgba(255, 255, 255, 0.1)",
+            backdropFilter: "blur(10px)",
+            borderRadius: "10px",
+            boxShadow: "0px 4px 30px rgba(0, 0, 0, 0.5)",
+            color: "white",
+          }}
+        >
+          <Typography variant="h5" sx={{ marginBottom: 2 }}>
+            Comments
+          </Typography>
+          <Divider sx={{ backgroundColor: "rgba(255, 255, 255, 0.3)", marginY: 2 }} />
+
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              overflowY: "auto",
+              maxHeight: "60vh",
+            }}
+          >
+            {comments.length > 0 ? (
+              comments.map((comment, index) => (
+                <Box
+                  key={index}
+                  padding={2}
+                  sx={{
+                    background: "rgba(255, 255, 255, 0.2)",
+                    borderRadius: "10px",
+                    boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.3)",
+                    color: "white",
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={2}>
+                    <Avatar src={comment.user.avatar}>
+                      {comment.user.avatar ? "" : comment.user.username.charAt(0)}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="subtitle2" fontWeight="bold">
+                        {comment.user.username}
+                      </Typography>
+                      <Typography variant="caption" color="gray">
+                        {comment.date}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Typography variant="body2" sx={{ marginTop: 1 }}>
+                    {comment.text}
+                  </Typography>
+                </Box>
+              ))
+            ) : (
+              <Typography>No comments yet.</Typography>
+            )}
           </Box>
-        ))}
-      </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              marginTop: 2,
+              padding: "10px",
+              borderRadius: "10px",
+              background: "rgba(255, 255, 255, 0.2)",
+            }}
+          >
+            <TextField
+              fullWidth
+              label="Leave a comment"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              variant="outlined"
+              sx={{
+                input: {
+                  color: "white",
+                },
+                "& .MuiOutlinedInput-root": {
+                  background: "rgba(255, 255, 255, 0.1)",
+                  borderRadius: "10px",
+                },
+              }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ padding: "0 15px", height: "56px" }}
+              onClick={handleComment}
+            >
+              Post
+            </Button>
+          </Box>
+        </Box>
+      </Drawer>
     </Box>
   );
 };

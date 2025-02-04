@@ -1,6 +1,7 @@
 import React from 'react';
 import { styled, Box } from '@mui/system';
 import './HomePage.css';
+
 const BlogGrid = styled(Box)(({ theme }) => ({
   display: 'grid',
   gridTemplateColumns: 'repeat(3, 1fr)',
