@@ -3,21 +3,21 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, InputLabel, TextField, Typography, Select, MenuItem, styled, useTheme } from "@mui/material";
 import toast from "react-hot-toast";
-import 'quill/dist/quill.snow.css'; 
+import 'quill/dist/quill.snow.css';
 import Quill from 'quill';
 
 const StyledFormBox = styled(Box)(({ theme }) => ({
-  width: "50%", 
+  width: "55%",
   border: "none",
   borderRadius: "20px",
   padding: theme.spacing(3),
-  margin: `${theme.spacing(4)} auto ${theme.spacing(1)} auto`,
+  margin: `${theme.spacing(-3)} auto`,
   display: "flex",
   flexDirection: "column",
   backgroundColor: theme.palette.background.paper,
-  boxShadow: theme.palette.mode === 'dark' 
-    ? `12px 12px 24px #bebebe, -12px -12px 24px #ffffff` 
-    : `12px 12px 24px #d9d9d9, -12px -12px 24px #ffffff`, 
+  boxShadow: theme.palette.mode === 'dark'
+    ? `12px 12px 24px #bebebe, -12px -12px 24px #ffffff`
+    : `12px 12px 24px #d9d9d9, -12px -12px 24px #ffffff`,
   transition: "all 0.3s ease-in-out"
 }));
 
@@ -28,22 +28,49 @@ const CreateBlog = () => {
   const navigate = useNavigate();
   const id = localStorage.getItem("userId");
   const [inputs, setInputs] = useState({ title: "", description: "", image: "", category: ""});
-  const [uploadedImage, setUploadedImage] = useState(null); 
-  const [useImageUrl, setUseImageUrl] = useState(true); 
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [useImageUrl, setUseImageUrl] = useState(true);
   const quillRef = useRef(null);
-  const quillEditor = useRef(null);
+  const [quill, setQuill] = useState(null);
 
   useEffect(() => {
-    if (!quillEditor.current && quillRef.current) {
-      const quill = new Quill(quillRef.current, { theme: 'snow' });
-      quillEditor.current = quill;
-      quill.on('text-change', () => { setInputs(prevInputs => ({ ...prevInputs, description: quill.root.innerHTML })); });
+    if (quillRef.current && !quill) {
+      const newQuill = new Quill(quillRef.current, {
+        theme: 'snow',
+        placeholder: "Write something amazing...",
+        modules: {
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike'],
+            ['blockquote', 'code-block'],
+            [{ 'header': 1 }, { 'header': 2 }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'script': 'sub'}, { 'script': 'super' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            [{ 'direction': 'rtl' }],
+            [{ 'size': ['small', false, 'large', 'huge'] }],
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'font': [] }],
+            [{ 'align': [] }],
+            ['clean']
+          ]
+        }
+      });
+
+      newQuill.on('text-change', () => {
+        setInputs((prev) => ({
+          ...prev,
+          description: newQuill.root.innerHTML
+        }));
+      });
+
+      setQuill(newQuill);
     }
-  }, []);
+  }, [quillRef, quill]);
 
   const handleChange = (e) => {
     setInputs({ ...inputs, [e.target.name]: e.target.value });
-};
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -54,32 +81,37 @@ const CreateBlog = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleBlogAction = async (status) => {
     const payload = {
       title: inputs.title,
       description: inputs.description,
-      image: useImageUrl ? inputs.image : uploadedImage, 
+      image: useImageUrl ? inputs.image : uploadedImage,
       category: inputs.category,
       user: id,
+      status
     };
 
+    if (!inputs.title || !inputs.description || !inputs.category || (!inputs.image && !uploadedImage)) {
+      toast.error("Please provide all fields");
+      return;
+    }
+    
     try {
       const response = await axios.post("/api/v1/blog/create-blog", payload);
       if (response.data.success) {
-        toast.success("Blog Created", { icon: '👏' });
+        toast.success(`Blog ${status === 'Published' ? 'published' : 'saved as draft'}`, { icon: '👏' });
         navigate("/my-blogs");
       } else {
-        throw new Error('Failed to create blog due to unknown reason.');
+        throw new Error(`Failed to ${status.toLowerCase()} blog.`);
       }
     } catch (error) {
       console.error("Failed to create blog:", error);
-      toast.error("Failed to create blog: " + (error.response ? error.response.data.message : "Check the console for more information."));
+      toast.error(`Failed to ${status.toLowerCase()} blog: ` + (error.response ? error.response.data.message : "Check the console for more information."));
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{
+    <form style={{
       backgroundImage: "url('./create.jpg')",
       backgroundSize: 'cover',
       backgroundPosition: 'center',
@@ -88,20 +120,27 @@ const CreateBlog = () => {
       flexDirection: 'column',
       justifyContent: 'center'
     }}>
+      <div style={{ alignSelf: 'flex-end', padding: theme.spacing(2) }}>
+        <Button onClick={() => handleBlogAction('Published')} variant="contained" style={{ marginRight: 15 }}>
+          Publish
+        </Button>
+        <Button onClick={() => handleBlogAction('Draft')} variant="outlined">
+          Save Draft
+        </Button>
+      </div>
       <StyledFormBox>
         <Typography variant="h5" textAlign="center" fontWeight="bold" paddingBottom={0} paddingTop={0} color={theme.palette.text.primary}>
           Create A Blog
         </Typography>
-        <InputLabel sx={{ mb: 1, fontSize: "14px", fontWeight: "medium", color: theme.palette.text.primary }}>Title</InputLabel>
-        <TextField name="title" value={inputs.title} onChange={handleChange} variant="outlined" required size="small" InputLabelProps={{ style: { color: theme.palette.text.primary } }} inputProps={{ style: { color: theme.palette.text.primary } }} />
-        <InputLabel sx={{ mb: 1, fontSize: "14px", fontWeight: "medium", color: theme.palette.text.primary }}>Description</InputLabel>
-        <div ref={quillRef} style={{ height: '150px', marginBottom: 1 }} />
-        <InputLabel sx={{ mb: 1, fontSize: "14px", fontWeight: "medium", color: theme.palette.text.primary }}>Category</InputLabel>
+        <InputLabel>Title</InputLabel>
+        <TextField name="title" value={inputs.title} onChange={handleChange} variant="outlined" required size="small" />
+        <InputLabel>Description</InputLabel>
+        <div ref={quillRef} style={{ height: 200, backgroundColor: theme.palette.background.paper }} />
+        <InputLabel>Category</InputLabel>
         <Select
           name="category"
           value={inputs.category}
           onChange={handleChange}
-          displayEmpty
           fullWidth
           required
         >
@@ -109,55 +148,16 @@ const CreateBlog = () => {
             <MenuItem key={index} value={category}>{category}</MenuItem>
           ))}
         </Select>
-        <InputLabel sx={{ mb: 1, fontSize: "14px", fontWeight: "medium", color: theme.palette.text.primary }}>
-          Choose Image Source
-        </InputLabel>
+        <InputLabel>Choose Image Source</InputLabel>
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
-          <Button
-            variant="contained"
-            color={useImageUrl ? "primary" : "default"}
-            onClick={() => { setUseImageUrl(true); setUploadedImage(null); }}
-          >
-            Use Image URL
-          </Button>
-          <Button
-            variant="contained"
-            color={!useImageUrl ? "primary" : "default"}
-            onClick={() => { setUseImageUrl(false); setInputs(prev => ({ ...prev, image: "" })); }}
-          >
-            Upload Image
-          </Button>
+          <Button variant="contained" onClick={() => setUseImageUrl(true)}>Use Image URL</Button>
+          <Button variant="contained" onClick={() => setUseImageUrl(false)}>Upload Image</Button>
         </div>
         {useImageUrl ? (
-          <>
-            <InputLabel sx={{ mb: 1, fontSize: "14px", fontWeight: "medium", color: theme.palette.text.primary }}>Image URL</InputLabel>
-            <TextField name="image" value={inputs.image} onChange={handleChange} variant="outlined" fullWidth size="small" />
-          </>
+          <TextField name="image" value={inputs.image} onChange={handleChange} variant="outlined" fullWidth size="small" />
         ) : (
-          <>
-            <InputLabel sx={{ mb: 1, fontSize: "14px", fontWeight: "medium", color: theme.palette.text.primary }}>Upload Image</InputLabel>
-            <input type="file" accept="image/*" onChange={handleFileChange} />
-            {uploadedImage && (
-  <div style={{ marginTop: 10, textAlign: "center" }}>
-    <img
-      src={uploadedImage}
-      alt="Uploaded Preview"
-      style={{
-        maxWidth: '100px',
-        maxHeight: '100px',
-        objectFit: 'cover',
-        display: "block",
-        border: "1px solid #ccc", 
-        borderRadius: "5px", 
-      }}
-    />
-  </div>
-)}
-          </>
+          <input type="file" accept="image/*" onChange={handleFileChange} />
         )}
-        <Button type="submit" color="primary" variant="contained" sx={{ mt: 2 }}>
-          SUBMIT
-        </Button>
       </StyledFormBox>
     </form>
   );

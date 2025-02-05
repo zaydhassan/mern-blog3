@@ -16,6 +16,36 @@ exports.createComment = async (req, res) => {
   }
 };
 
+exports.updateComment = async (req, res) => {
+  const { commentId } = req.params;
+  const { content } = req.body;
+
+  try {
+    const updatedComment = await Comment.findByIdAndUpdate(commentId, { content, updated_at: new Date() }, { new: true });
+    if (!updatedComment) {
+      return res.status(404).send({ message: 'Comment not found' });
+    }
+    res.status(200).send(updatedComment);
+  } catch (error) {
+    res.status(500).send({ message: 'Failed to update comment', error });
+  }
+};
+
+exports.deleteComment = async (req, res) => {
+  const { commentId } = req.params;
+  try {
+      const deletedComment = await Comment.findByIdAndDelete(commentId);
+      if (!deletedComment) {
+          return res.status(404).send({ message: 'Comment not found' });
+      }
+      res.status(204).send();
+  } catch (error) {
+      console.error(`Error deleting comment: ${error}`);
+      res.status(500).send({ message: 'Failed to delete comment', error: error.toString() });
+  }
+};
+
+
 exports.getCommentsByBlog = async (req, res) => {
   const { blogId } = req.params;
   try {

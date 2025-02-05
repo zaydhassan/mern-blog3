@@ -10,10 +10,11 @@ import {
   TextField,
   Button,
   Divider,
+  CardMedia,
 } from "@mui/material";
-import { Favorite, FavoriteBorder, Share, Comment } from "@mui/icons-material";
+import { Favorite, FavoriteBorder, Share, Comment, Edit, Delete } from "@mui/icons-material";
 import toast from "react-hot-toast";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import moment from "moment";
 
@@ -27,6 +28,10 @@ const BlogDetails = () => {
   const [newComment, setNewComment] = useState("");
   const { id } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const [recommendations, setRecommendations] = useState([]);
+  const [editingComment, setEditingComment] = useState({ id: null, text: "" });
+  const [replyText, setReplyText] = useState({});
 
   useEffect(() => {
     const fetchBlogDetails = async () => {
@@ -43,7 +48,20 @@ const BlogDetails = () => {
         toast.error("Failed to fetch blog details.");
       }
     };
+
+    const fetchRecommendations = async () => {
+      try {
+        const { data } = await axios.get("/api/v1/blog/all-blog");
+        if (data.success) {
+          setRecommendations(data.blogs.slice(0, 5));
+        }
+      } catch (error) {
+        console.error("Failed to fetch recommendations:", error);
+      }
+    };
+
     fetchBlogDetails();
+    fetchRecommendations();
   }, [id]);
 
   const handleLike = async () => {
@@ -64,25 +82,27 @@ const BlogDetails = () => {
       toast.error("Please write a comment before posting.");
       return;
     }
+
     let currentUser = user;
     if (!currentUser) {
       const storedUser = localStorage.getItem('user');
       currentUser = storedUser ? JSON.parse(storedUser) : null;
     }
-  
+
     if (!currentUser || !currentUser.username) {
       toast.error("User data not available.");
       return;
     }
-  
+
     const formattedDate = moment().format("MMM DD");
-  
+
     try {
       const { data, status } = await axios.post(`/api/v1/comments`, {
         content: newComment,
         blog_id: id,
+        user_id: currentUser._id
       });
-  
+
       if (status === 201 && data) {
         setComments([
           ...comments,
@@ -104,9 +124,72 @@ const BlogDetails = () => {
       toast.error(error.response?.data?.message || "Error adding comment");
     }
   };
-  
+
   const toggleComments = () => {
     setCommentsOpen((prev) => !prev);
+  };
+
+  const handleEdit = (commentId) => {
+    if (!commentId) {
+      toast.error("Cannot edit comment without an ID.");
+      return;
+    }
+    const commentToEdit = comments.find(comment => comment._id === commentId);
+    if (commentToEdit) {
+      setEditingComment({ id: commentToEdit._id, text: commentToEdit.text });
+    } else {
+      toast.error("Comment not found for editing.");
+    }
+  };
+  
+  
+  const handleEditSave = async (commentId, updatedText) => {
+    try {
+        const response = await axios.put(`/api/v1/comments/${commentId}`, { content: updatedText });
+        if (response.status === 200) {
+          
+            setComments(comments.map(comment =>
+                comment._id === commentId ? { ...comment, content: updatedText } : comment
+            ));
+            toast.success("Comment updated successfully!");
+        }
+    } catch (error) {
+        console.error("Failed to update comment:", error);
+        toast.error("Failed to update comment.");
+    }
+};
+
+  
+const handleDelete = async (commentId) => {
+  if (!commentId) {
+    toast.error("Cannot delete comment without an ID.");
+    return;
+  }
+  try {
+    const response = await axios.delete(`/api/v1/comments/${commentId}`);
+    if (response.status === 204) {
+        setComments(comments.filter(comment => comment._id !== commentId));
+        toast.success("Comment deleted successfully!");
+    }
+  } catch (error) {
+    console.error("Failed to delete comment:", error);
+    toast.error("Failed to delete comment.");
+  }
+};
+
+
+  const handleReply = async (commentId, replyContent) => {
+    if (!replyContent) return toast.error("Reply cannot be empty.");
+    try {
+      const { data } = await axios.post(`/api/v1/comments/reply`, { parentId: commentId, content: replyContent });
+      setComments((prev) =>
+        prev.map((c) => (c.id === commentId ? { ...c, replies: [...c.replies, data] } : c))
+      );
+      toast.success("Reply added successfully!");
+      setReplyText((prev) => ({ ...prev, [commentId]: "" }));
+    } catch (error) {
+      toast.error("Failed to add reply.");
+    }
   };
 
   if (loading) {
@@ -126,6 +209,7 @@ const BlogDetails = () => {
           marginBottom: "20px",
         }}
       />
+
       <Box display="flex" justifyContent="space-between">
         <Box display="flex" alignItems="center" gap={2}>
           <Avatar sx={{ width: 40, height: 40 }} src={blog?.user?.profile_image || ""}>
@@ -136,6 +220,7 @@ const BlogDetails = () => {
             {new Date(blog?.createdAt).toDateString()}
           </Typography>
         </Box>
+
         <Box display="flex" gap={2}>
           <IconButton onClick={handleLike}>
             <Badge badgeContent={likeCount} color="primary">
@@ -158,12 +243,51 @@ const BlogDetails = () => {
         {blog?.description}
       </Typography>
 
-      <Drawer
-        anchor="right"
-        open={commentsOpen}
-        onClose={toggleComments}
-        sx={{ width: 400 }}
-      >
+      <Typography variant="h5" fontWeight="bold" marginTop={5} marginBottom={3}>
+        Recommended for You ↝
+      </Typography>
+
+      {recommendations.map((rec, index) => (
+        <Box
+          key={rec._id}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            marginBottom: 3,
+            cursor: "pointer",
+            color: "#fff",
+          }}
+          onClick={() => navigate(`/blog-details/${rec._id}`)}
+        >
+          <Typography variant="h4" fontWeight="bold" sx={{ marginRight: 2 }}>
+            0{index + 1}
+          </Typography>
+          <Avatar
+            src={rec.user.profile_image}
+            sx={{ width: 40, height: 40, marginRight: 2 }}
+            alt={rec.user.username}
+          />
+          <Box flexGrow={1}>
+            <Typography variant="subtitle1" fontWeight="bold">
+              {rec.title}
+            </Typography>
+            <Typography variant="caption" display="block">
+              {rec.user.username}
+            </Typography>
+            <Typography variant="caption" color="gray">
+              {moment(rec.created_at).format("MMM DD")}
+            </Typography>
+          </Box>
+          <CardMedia
+            component="img"
+            sx={{ width: 100, height: 60, borderRadius: "10px" }}
+            image={rec.image}
+            alt={rec.title}
+          />
+        </Box>
+      ))}
+
+      <Drawer anchor="right" open={commentsOpen} onClose={toggleComments} sx={{ width: 400 }}>
         <Box
           width={400}
           padding={2}
@@ -203,22 +327,102 @@ const BlogDetails = () => {
                     color: "white",
                   }}
                 >
-                  <Box display="flex" alignItems="center" gap={2}>
-                    <Avatar src={comment.user.avatar}>
-                      {comment.user.avatar ? "" : comment.user.username.charAt(0)}
-                    </Avatar>
+                  <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Avatar src={comment.user.avatar}>
+                        {comment.user.avatar ? "" : comment.user.username.charAt(0)}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="subtitle2" fontWeight="bold">
+                          {comment.user.username}
+                        </Typography>
+                        <Typography variant="caption" color="gray">
+                          {comment.date}
+                        </Typography>
+                      </Box>
+                    </Box>
                     <Box>
-                      <Typography variant="subtitle2" fontWeight="bold">
-                        {comment.user.username}
-                      </Typography>
-                      <Typography variant="caption" color="gray">
-                        {comment.date}
-                      </Typography>
+                      
+                      <IconButton onClick={() => handleEdit(comment._id)}>
+                        <Edit fontSize="small" sx={{ color: "white" }} />
+                      </IconButton>
+                      <IconButton onClick={() => handleDelete(comment._id)}>
+                        <Delete fontSize="small" sx={{ color: "white" }} />
+                      </IconButton>
                     </Box>
                   </Box>
-                  <Typography variant="body2" sx={{ marginTop: 1 }}>
-                    {comment.text}
-                  </Typography>
+
+                  {editingComment?.id === comment._id ? (
+                    <Box display="flex" alignItems="center" gap={1} marginTop={1}>
+                      <TextField
+                        fullWidth
+                        value={editingComment.text}
+                        onChange={(e) =>
+                          setEditingComment((prev) => ({ ...prev, text: e.target.value }))
+                        }
+                        size="small"
+                        sx={{
+                          input: { color: "white" },
+                          "& .MuiOutlinedInput-root": {
+                            background: "rgba(255, 255, 255, 0.1)",
+                          },
+                        }}
+                      />
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => handleEditSave(comment._id, editingComment.text)}
+                      >
+                        Save
+                      </Button>
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" sx={{ marginTop: 1 }}>
+                      {comment.text}
+                    </Typography>
+                  )}
+
+                  {comment.replies?.map((reply, idx) => (
+                    <Box
+                      key={idx}
+                      sx={{
+                        marginLeft: 3,
+                        background: "rgba(255, 255, 255, 0.1)",
+                        padding: 1,
+                        borderRadius: "8px",
+                      }}
+                    >
+                      <Typography variant="subtitle2" fontWeight="bold">
+                        {reply.user.username}
+                      </Typography>
+                      <Typography variant="body2">{reply.content}</Typography>
+                    </Box>
+                  ))}
+
+                  <Box display="flex" alignItems="center" gap={1} marginTop={1}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      placeholder="Write a reply..."
+                      value={replyText[comment._id] || ""}
+                      onChange={(e) =>
+                        setReplyText((prev) => ({ ...prev, [comment._id]: e.target.value }))
+                      }
+                      sx={{
+                        input: { color: "white" },
+                        "& .MuiOutlinedInput-root": {
+                          background: "rgba(255, 255, 255, 0.1)",
+                        },
+                      }}
+                    />
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleReply(comment._id, replyText[comment._id])}
+                    >
+                      Reply
+                    </Button>
+                  </Box>
                 </Box>
               ))
             ) : (
