@@ -3,15 +3,18 @@ import axios from 'axios';
 import moment from 'moment';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Typography, Box, Grid, Button, CircularProgress,Avatar,CardMedia
+  Typography,InputAdornment, TextField,Box, Grid, Button, CircularProgress,Avatar,CardMedia
 } from '@mui/material';
 import BlogCard from '../components/BlogCard'; 
+import SearchIcon from '@mui/icons-material/Search';
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [filteredBlogs, setFilteredBlogs] = useState([]);
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const categories = ['Technology', 'Education', 'Health', 'Entertainment', 'Food', 'Business', 'Social Media', 'Travel', 'News'];
 
@@ -36,12 +39,15 @@ const fetchBlogs = async () => {
         userAvatar: blog.user.profile_image 
       }));
       setBlogs(formattedBlogs);
+      setFilteredBlogs(formattedBlogs);
     } else {
       setBlogs([]);
+      setFilteredBlogs([]);
     }
   } catch (error) {
     console.error('Failed to fetch blogs:', error);
     setBlogs([]);
+    setFilteredBlogs([]);
   } finally {
     setLoading(false);
   }
@@ -49,6 +55,15 @@ const fetchBlogs = async () => {
 
 fetchBlogs();
 }, [location.pathname]);
+
+useEffect(() => {
+  const filtered = blogs.filter(blog =>
+    blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    blog.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (blog.tags && blog.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())))
+  );
+  setFilteredBlogs(filtered);
+}, [searchQuery, blogs]);
 
   if (loading) {
     return (
@@ -62,32 +77,83 @@ fetchBlogs();
     <Box sx={{ backgroundColor: '#121212', color: '#fff', minHeight: '100vh', padding: 4 }}>
     <style>
       {`
-        .neon-effect {
-          border: 2.5px solid #000;
-          box-shadow: 0 0 5px #9dff00, 0 0 21px #9dff00, 0 0 11px #9dff00, 0 0 0px #9dff00;
-        }
+       .neon-effect {
+      border: 2px solid #000;
+      border-radius: 50px;
+       background-color:#B2FFFF;
+      color: #000;
+      transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    }
 
-        .neon-effect:hover {
-          animation: neon 1.8s ease-in-out infinite alternate;
-        }
+    .neon-effect:hover {
+      background-color: #4bff00;
+      box-shadow: 0 0 25px #9dff00, 0 0 50px #9dff00, 0 0 100px #9dff00, 0 0 250px rgba(0, 0, 0, 0.8);
+    }
+          .custom-search-box {
+            width: 300px;
+            padding: 5px 20px;
+            background-color: #fff;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            background-image: linear-gradient(120deg, #fbc2eb, #a6c1ee);
+          }
 
-        @keyframes neon {
-          from {
-            box-shadow: 0 0 5px #9dff00, 0 0 25px #9dff00, 0 0 50px #9dff00, 0 0 200px #9dff00;
+          .custom-search-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50px;
+            padding: 2px;
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fbc2eb);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: destination-out;
+            mask-composite: exclude;
           }
-          to {
-            box-shadow: 0 0 10px #9dff00, 0 0 35px #9dff00, 0 0 70px #9dff00, 0 0 300px #9dff00;
+
+          input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: #333;
+            font-size: 1rem;
           }
-        }
-      `}
-    </style>
+        `}
+      </style>
+
+       <Box display="flex" justifyContent="center" marginBottom={4}>
+        <Box className="custom-search-box">
+          <TextField
+            placeholder="Search blogs..."
+            variant="standard"
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon style={{ color: '#555' }} />
+                </InputAdornment>
+              ),
+              disableUnderline: true
+            }}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </Box>
+      </Box>
+
     <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Typography variant="h4" fontWeight="bold" marginBottom={3} sx={{ color: '#fff' }}>
           {location.pathname.includes('/category/') ? `Blogs in ${location.pathname.split('/').pop()}` : 'Featured This Week'}
           </Typography>
           <Grid container spacing={2}>
-          {blogs.map((blog, index) => (
+          {filteredBlogs.map((blog, index) => (
             <Grid item xs={12} sm={6} key={index}>
               <BlogCard
                 id={blog._id}
@@ -107,28 +173,34 @@ fetchBlogs();
             Browse Categories
           </Typography>
           <Grid container spacing={2} justifyContent="center">
-  {categories.map((category, index) => (
-    <Grid item xs={4} key={index} style={{ display: 'flex', justifyContent: 'center' }}>
-      <Button
-        variant="contained"
-        className="neon-effect"
-        style={{
-          borderRadius: '50px',
-          minWidth: 'auto',
-          padding: '10px 18px',
-          textTransform: 'none',
-          backgroundColor: '#c9ee82',
-          '&:hover': { backgroundColor: '#555' },
-          color: '#000',
-          fontWeight: 'bold',
-          width: '100%',
+  {categories.map((category, index) => {
+    const isActive = location.pathname.includes(`/category/${category}`);
+    return (
+      <Grid item xs={4} key={index} style={{ display: 'flex', justifyContent: 'center' }}>
+        <Button
+          variant="contained"
+          className={`neon-effect ${isActive ? 'active-category' : ''}`}
+          style={{
+            borderRadius: '50px',
+            minWidth: 'auto',
+            padding: '10px 18px',
+            textTransform: 'none',
+            fontWeight: 'bold',
+            width: '100%',
+            backgroundColor: isActive ? '#4bff00' : '#B2FFFF',  
+            color: isActive ? '' : '#000',
+            boxShadow: isActive
+            ? '0 0 5px #9dff00, 0 0 20px #9dff00, 0 0 20px #9dff00'
+            : 'none',  
+          border: isActive ? '2px solid #9dff00' : '2px solid transparent'
         }}
-        onClick={() => handleCategoryClick(category)}
-      >
-        {category}
-      </Button>
-    </Grid>
-  ))}
+          onClick={() => handleCategoryClick(category)}
+        >
+          {category}
+        </Button>
+      </Grid>
+    );
+  })}
 </Grid>
 
           <Typography variant="h6" fontWeight="bold" marginTop={4} marginBottom={2} sx={{ color: '#fff' }}>
@@ -137,7 +209,7 @@ fetchBlogs();
           {blogs.slice(0, 5).map((blog, index) => (
             <Box key={blog._id} sx={{ display: 'flex', alignItems: 'center', marginBottom: 2, cursor: 'pointer', color: '#fff' }} onClick={() => navigate(`/blog-details/${blog._id}`)}>
               <Box sx={{ minWidth: '50px', marginRight: '10px' }}>
-                <Typography variant="h4" fontWeight="bold" color="primary">
+                <Typography variant="h4" fontWeight="bold" color="">
                   0{index + 1}
                 </Typography>
               </Box>

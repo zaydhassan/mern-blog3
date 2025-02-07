@@ -120,8 +120,11 @@ const Login = () => {
                 border: "1px solid #ccc", 
                 borderRadius: "5px",
               }}
+              InputProps={{
+                style: { color: "#000" },  
+              }}
               InputLabelProps={{
-                style: { color: "#000" }, 
+                style: { color: "#666" }, 
               }}
             />
 
@@ -142,9 +145,6 @@ const Login = () => {
                 border: "1px solid #ccc",
                 borderRadius: "5px",
               }}
-              InputLabelProps={{
-                style: { color: "#000" },
-              }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -157,9 +157,13 @@ const Login = () => {
                     </IconButton>
                   </InputAdornment>
                 ),
+                style: { color: "#000" },  
+              }}
+              InputLabelProps={{
+                style: { color: "#666" },  
               }}
             />
-
+            
             <Button
               type="submit"
               fullWidth

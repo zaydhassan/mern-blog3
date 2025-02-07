@@ -34,39 +34,49 @@ const CreateBlog = () => {
   const [quill, setQuill] = useState(null);
 
   useEffect(() => {
-    if (quillRef.current && !quill) {
-      const newQuill = new Quill(quillRef.current, {
+    const editorContainer = quillRef.current;  
+
+    if (editorContainer && !quill) {
+      const newQuill = new Quill(editorContainer, {
         theme: 'snow',
-        placeholder: "Write something amazing...",
+        placeholder: 'Write something amazing...',
         modules: {
           toolbar: [
             ['bold', 'italic', 'underline', 'strike'],
             ['blockquote', 'code-block'],
-            [{ 'header': 1 }, { 'header': 2 }],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            [{ 'script': 'sub'}, { 'script': 'super' }],
-            [{ 'indent': '-1'}, { 'indent': '+1' }],
-            [{ 'direction': 'rtl' }],
-            [{ 'size': ['small', false, 'large', 'huge'] }],
-            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-            [{ 'color': [] }, { 'background': [] }],
-            [{ 'font': [] }],
-            [{ 'align': [] }],
-            ['clean']
-          ]
-        }
+            [{ header: 1 }, { header: 2 }],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ script: 'sub' }, { script: 'super' }],
+            [{ indent: '-1' }, { indent: '+1' }],
+            [{ direction: 'rtl' }],
+            [{ size: ['small', false, 'large', 'huge'] }],
+            [{ header: [1, 2, 3, 4, 5, 6, false] }],
+            [{ color: [] }, { background: [] }],
+            [{ font: [] }],
+            [{ align: [] }],
+            ['clean'],
+          ],
+        },
       });
 
       newQuill.on('text-change', () => {
         setInputs((prev) => ({
           ...prev,
-          description: newQuill.root.innerHTML
+          description: newQuill.root.innerHTML,
         }));
       });
 
       setQuill(newQuill);
     }
-  }, [quillRef, quill]);
+
+    return () => {
+      if (quill) {
+        quill.off('text-change');  
+        if (editorContainer) editorContainer.innerHTML = "";  
+        setQuill(null);  
+      }
+    };
+  }, [quill]);     
 
   const handleChange = (e) => {
     setInputs({ ...inputs, [e.target.name]: e.target.value });
@@ -95,7 +105,7 @@ const CreateBlog = () => {
       toast.error("Please provide all fields");
       return;
     }
-    
+
     try {
       const response = await axios.post("/api/v1/blog/create-blog", payload);
       if (response.data.success) {

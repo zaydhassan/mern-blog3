@@ -116,8 +116,11 @@ const Register = () => {
                 border: "1px solid #ccc",
                 borderRadius: "5px",
               }}
+              InputProps={{
+                style: { color: "#000" },  
+              }}
               InputLabelProps={{
-                style: { color: "#000" },
+                style: { color: "#666" },  
               }}
             />
             <TextField
@@ -136,8 +139,11 @@ const Register = () => {
                 border: "1px solid #ccc",
                 borderRadius: "5px",
               }}
+              InputProps={{
+                style: { color: "#000" },  
+              }}
               InputLabelProps={{
-                style: { color: "#000" },
+                style: { color: "#666" },  
               }}
             />
             <TextField
@@ -157,9 +163,6 @@ const Register = () => {
                 border: "1px solid #ccc",
                 borderRadius: "5px",
               }}
-              InputLabelProps={{
-                style: { color: "#000" },
-              }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -172,6 +175,10 @@ const Register = () => {
                     </IconButton>
                   </InputAdornment>
                 ),
+                style: { color: "#000" },  
+              }}
+              InputLabelProps={{
+                style: { color: "#666" }, 
               }}
             />
             <Button

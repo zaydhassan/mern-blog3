@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { styled, Box } from '@mui/system';
+import { TextField, Button, Typography } from '@mui/material';
 import './HomePage.css';
+import axios from 'axios';
 
 const BlogGrid = styled(Box)(({ theme }) => ({
   display: 'grid',
@@ -24,7 +26,6 @@ const Blogdummy = styled(Box)(({ theme }) => ({
   },
 }));
 
-
 const blogs = [
   { id: 1, title: "Future Tech Trends", summary: "Exploring the upcoming technologies shaping our future.", image: "/tech1.jpeg" },
   { id: 2, title: "AI and Machine Learning", summary: "How AI is transforming industries and what it means for the future.", image: "/tech2.png" },
@@ -35,19 +36,99 @@ const blogs = [
 ];
 
 const Home = () => {
+  const [email, setEmail] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleSubscribe = async () => {
+    if (email.trim() === '') {
+      setErrorMessage('Please enter a valid email.');
+      setSuccessMessage('');
+      return;
+    }
+    try {
+      const response = await axios.post('http://localhost:8080/api/v1/newsletter/subscribe', { email });
+
+      if (response.data.success) {
+        setSuccessMessage('Thank you for subscribing! 🎉');
+        setErrorMessage('');
+        setEmail('');
+      } else {
+        throw new Error('Subscription failed.');
+      }
+    } catch (error) {
+      setErrorMessage('Oops! Something went wrong. Please try again later.');
+      setSuccessMessage('');
+    }
+  };
+
   return (
     <>
-      <div className="HeroSection" style={{ backgroundImage: 'url(/hero.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', color: '#fff' }}>
-      <h1>A Blog for Passionate People and Website Lovers</h1>
-      <p>Watch creation is an evolutionary recreation just like life. Skills and knowledge are a living state.</p>
-    </div>
+      <div
+        className="HeroSection"
+        style={{
+          backgroundImage: 'url(/hero.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          color: '#fff',
+        }}
+      >
+        <h1>A Blog for Passionate People and Website Lovers</h1>
+        <p>Watch creation is an evolutionary recreation just like life. Skills and knowledge are a living state.</p>
+      </div>
+
+      {/* Newsletter Section */}
+      <div className="newsletter-section">
+        <div className="newsletter-section-content">
+          <Typography variant="h4" sx={{ mb: 2, fontWeight: 'bold' }}>
+            Join Our Newsletter
+          </Typography>
+          <Typography variant="subtitle1" sx={{ mb: 3 }}>
+            Get the latest blog posts and updates delivered to your inbox.
+          </Typography>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
+            <TextField
+              variant="outlined"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              sx={{
+                width: '100%',
+                maxWidth: '400px',
+                bgcolor: '#fff',
+                borderRadius: '5px',
+                '& .MuiInputBase-input': {
+                  color: '#333333',
+                },
+              }}
+            />
+            <Button className="subscribe-button" onClick={handleSubscribe}>
+              Subscribe
+            </Button>
+          </div>
+
+          {successMessage && (
+            <Typography variant="subtitle1" sx={{ mt: 2, color: '#00e676' }}>
+              {successMessage}
+            </Typography>
+          )}
+
+{errorMessage && (
+          <Typography variant="subtitle1" sx={{ mt: 2, color: 'red' }}>
+            {errorMessage}
+          </Typography>
+        )}
+
+        </div>
+      </div>
+
       <BlogGrid>
-        {blogs.map(blog => (
+        {blogs.map((blog) => (
           <Blogdummy key={blog.id}>
             <img src={blog.image} alt={blog.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
             <h3>{blog.title}</h3>
             <p>{blog.summary}</p>
-           
           </Blogdummy>
         ))}
       </BlogGrid>
