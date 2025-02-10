@@ -36,16 +36,18 @@ const BlogDetails = () => {
   useEffect(() => {
     const fetchBlogDetails = async () => {
       try {
-        const { data } = await axios.get(`/api/v1/blog/get-blog/${id}`);
-        if (data.success) {
-          setBlog(data.blog);
-          setComments(data.blog.comments || []);
-          setLiked(data.blog.liked);
-          setLikeCount(data.blog.likes?.length || 0);
-          setLoading(false);
+        const response = await axios.get(`/api/v1/blog/get-blog/${id}`);
+        console.log("Fetched Blog Details:", response.data.blog);  // Debugging log
+        if (response.data.success) {
+          setBlog(response.data.blog);
+        } else {
+          toast.error("Failed to fetch blog details.");
         }
       } catch (error) {
+        console.error("Error fetching blog details:", error);
         toast.error("Failed to fetch blog details.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -177,7 +179,6 @@ const handleDelete = async (commentId) => {
   }
 };
 
-
   const handleReply = async (commentId, replyContent) => {
     if (!replyContent) return toast.error("Reply cannot be empty.");
     try {
@@ -210,16 +211,25 @@ const handleDelete = async (commentId) => {
         }}
       />
 
-      <Box display="flex" justifyContent="space-between">
-        <Box display="flex" alignItems="center" gap={2}>
-          <Avatar sx={{ width: 40, height: 40 }} src={blog?.user?.profile_image || ""}>
-            {blog?.user?.username?.charAt(0)}
-          </Avatar>
-          <Typography variant="h6">{blog?.user?.username}</Typography>
-          <Typography variant="body2" color="gray">
-            {new Date(blog?.createdAt).toDateString()}
-          </Typography>
-        </Box>
+<Box display="flex" alignItems="center" gap={2} marginBottom={2}>
+<Avatar
+  sx={{ width: 56, height: 56 }}
+  src={blog?.user?.profile_image || "/default-avatar.png"}
+  alt={blog?.user?.username || "User"}
+>
+  {!blog?.user?.profile_image && blog?.user?.username 
+    ? blog?.user?.username.charAt(0).toUpperCase() 
+    : ""}
+</Avatar>
+  <Box>
+    <Typography variant="subtitle1" fontWeight="bold">
+      {blog?.user?.username || "Unknown User"}
+    </Typography>
+    <Typography variant="body2" color="textSecondary">
+      {moment(blog?.created_at).format("MMMM DD, YYYY")}
+    </Typography>
+  </Box>
+</Box>
 
         <Box display="flex" gap={2}>
           <IconButton onClick={handleLike}>
@@ -234,14 +244,15 @@ const handleDelete = async (commentId) => {
             <Share />
           </IconButton>
         </Box>
-      </Box>
+      
 
-      <Typography variant="h4" fontWeight="bold" marginTop={3}>
+        <Typography variant="h4" fontWeight="bold" marginTop={3}>
         {blog?.title}
       </Typography>
-      <Typography variant="body1" marginTop={2} color="gray">
-        {blog?.description}
-      </Typography>
+      <Box
+        dangerouslySetInnerHTML={{ __html: blog?.description }}
+        sx={{ marginTop: 2, color: "gray" }}
+      />
 
       <Typography variant="h5" fontWeight="bold" marginTop={5} marginBottom={3}>
         Recommended for You ↝

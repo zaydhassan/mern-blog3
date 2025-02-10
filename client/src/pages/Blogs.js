@@ -74,6 +74,7 @@ useEffect(() => {
   }
 
   return (
+    
     <Box sx={{ backgroundColor: '#121212', color: '#fff', minHeight: '100vh', padding: 4 }}>
     <style>
       {`
@@ -163,6 +164,7 @@ useEffect(() => {
                 username={blog.user.username}
                 time={moment(blog.created_at).format('MMM DD, YYYY')}
                 userAvatar={blog.userAvatar}
+                tags={blog.tags ? blog.tags.map(tag => tag.tag_name).join(", ") : "No tags available"} 
               />
             </Grid>
           ))}

@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Box, Button, InputLabel, TextField, Typography, Select, MenuItem, styled, useTheme } from "@mui/material";
+import { Box, Button, InputLabel, TextField, Typography, Select, MenuItem, styled, useTheme, IconButton } from "@mui/material";
 import toast from "react-hot-toast";
 import 'quill/dist/quill.snow.css';
 import Quill from 'quill';
+import MicIcon from '@mui/icons-material/Mic';
+import MicOffIcon from '@mui/icons-material/MicOff';
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 
 const StyledFormBox = styled(Box)(({ theme }) => ({
   width: "55%",
@@ -27,14 +30,24 @@ const CreateBlog = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const id = localStorage.getItem("userId");
-  const [inputs, setInputs] = useState({ title: "", description: "", image: "", category: ""});
+  const [inputs, setInputs] = useState({ title: "", description: "", image: "", category: "" });
   const [uploadedImage, setUploadedImage] = useState(null);
   const [useImageUrl, setUseImageUrl] = useState(true);
   const quillRef = useRef(null);
   const [quill, setQuill] = useState(null);
 
+  const { transcript, listening, resetTranscript } = useSpeechRecognition();
+
   useEffect(() => {
-    const editorContainer = quillRef.current;  
+    if (quill && transcript) {
+      quill.root.innerHTML += ` ${transcript}`;
+      setInputs((prev) => ({ ...prev, description: quill.root.innerHTML }));
+      resetTranscript();
+    }
+  }, [transcript,quill,resetTranscript]);
+
+  useEffect(() => {
+    const editorContainer = quillRef.current;
 
     if (editorContainer && !quill) {
       const newQuill = new Quill(editorContainer, {
@@ -71,12 +84,12 @@ const CreateBlog = () => {
 
     return () => {
       if (quill) {
-        quill.off('text-change');  
-        if (editorContainer) editorContainer.innerHTML = "";  
-        setQuill(null);  
+        quill.off('text-change');
+        if (editorContainer) editorContainer.innerHTML = "";
+        setQuill(null);
       }
     };
-  }, [quill]);     
+  }, [quill]);
 
   const handleChange = (e) => {
     setInputs({ ...inputs, [e.target.name]: e.target.value });
@@ -92,12 +105,14 @@ const CreateBlog = () => {
   };
 
   const handleBlogAction = async (status) => {
+    const tagsArray = inputs.tags.split(',').map(tag => tag.trim());
     const payload = {
       title: inputs.title,
       description: inputs.description,
       image: useImageUrl ? inputs.image : uploadedImage,
       category: inputs.category,
       user: id,
+      tags: tagsArray,
       status
     };
 
@@ -144,8 +159,31 @@ const CreateBlog = () => {
         </Typography>
         <InputLabel>Title</InputLabel>
         <TextField name="title" value={inputs.title} onChange={handleChange} variant="outlined" required size="small" />
+
         <InputLabel>Description</InputLabel>
-        <div ref={quillRef} style={{ height: 200, backgroundColor: theme.palette.background.paper }} />
+        <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '12px' }}>
+          <div
+            ref={quillRef}
+            style={{
+              height: 250,
+              width: '100%',
+              padding: '10px',
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: '4px',
+              border: '1px solid #ccc',
+            }}
+          />
+          <IconButton
+            onClick={() => {
+              listening ? SpeechRecognition.stopListening() : SpeechRecognition.startListening({ continuous: true });
+            }}
+            color={listening ? "secondary" : "primary"}
+            style={{ marginLeft: '12px', marginTop: '10px' }}
+          >
+            {listening ? <MicOffIcon /> : <MicIcon />}
+          </IconButton>
+        </div>
+
         <InputLabel>Category</InputLabel>
         <Select
           name="category"
@@ -158,6 +196,12 @@ const CreateBlog = () => {
             <MenuItem key={index} value={category}>{category}</MenuItem>
           ))}
         </Select>
+        <TextField
+  name="tags"
+  placeholder="Enter tags separated by commas"
+  value={inputs.tags || ''}
+  onChange={handleChange}
+/>
         <InputLabel>Choose Image Source</InputLabel>
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
           <Button variant="contained" onClick={() => setUseImageUrl(true)}>Use Image URL</Button>

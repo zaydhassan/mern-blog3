@@ -1,56 +1,40 @@
 import React from "react";
 import { Typography, Container, Grid, Box, useTheme } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFacebookF, faInstagram, faTwitter, faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
-import { motion } from "framer-motion";
+import { faInstagram, faYoutube, faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
+import { faGlobe } from "@fortawesome/free-solid-svg-icons"; 
+import { motion } from 'framer-motion';
 
 const AboutPage = () => {
   const theme = useTheme();
+  const isDarkMode = theme.palette.mode === 'dark';
 
   return (
     <>
       <style>
         {`
           .icon {
-            color: #fff;
+            color: ${isDarkMode ? '#fff' : '#191717'};
             font-size: 30px;
             height: 60px;
             width: 60px;
-            background: #191717;
+            background: ${theme.palette.background.paper};
             line-height: 60px;
             border-radius: 50%;
             margin: 0 15px;
             cursor: pointer;
-            transition: 0.5s;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-          }
-
-          .icon::before {
-            position: absolute;
-            content: '';
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 100%;
-            border-radius: 50%;
-            background: #d35400;
-            transform: scale(0.9);
-            z-index: -1;
-            transition: 0.5s;
+            box-shadow: 8px 8px 15px #babecc, -8px -8px 15px #ffffff;
+            transition: 0.4s;
           }
 
           .icon:hover {
             color: #ff6600;
-            box-shadow: 0 0 25px #ff6600, 0 0 50px #ff6600;
-            text-shadow: 0 0 25px #ff6600, 0 0 50px #ff6600;
-            background-color: #000;
-          }
-
-          .icon:hover::before {
-            transform: scale(1.2);
+            background: ${theme.palette.background.default};
+            box-shadow: inset 8px 8px 15px #babecc, inset -8px -8px 15px #ffffff;
           }
         `}
       </style>
@@ -66,7 +50,6 @@ const AboutPage = () => {
       >
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
-            {/* Animated Image Section */}
             <Grid item xs={12} md={6}>
               <motion.div
                 initial={{ opacity: 0, x: -100 }}
@@ -113,10 +96,18 @@ const AboutPage = () => {
             transition={{ duration: 0.7 }}
             style={{ marginTop: 40, display: 'flex', justifyContent: 'center', gap: 20 }}
           >
-            <div className="icon"><FontAwesomeIcon icon={faFacebookF} /></div>
-            <div className="icon"><FontAwesomeIcon icon={faInstagram} /></div>
-            <div className="icon"><FontAwesomeIcon icon={faTwitter} /></div>
-            <div className="icon"><FontAwesomeIcon icon={faLinkedinIn} /></div>
+            <a href="https://polysia.github.io/Main-Website/" target="_blank" className="icon">
+              <FontAwesomeIcon icon={faGlobe} />
+            </a>
+            <a href="https://www.youtube.com/@PolysiaTech" target="_blank" className="icon">
+              <FontAwesomeIcon icon={faYoutube} />
+            </a>
+            <a href="https://www.linkedin.com/in/polysia-tech/" target="_blank" className="icon">
+              <FontAwesomeIcon icon={faLinkedinIn} />
+            </a>
+            <a href="https://www.instagram.com/polysiatech/" target="_blank" className="icon">
+              <FontAwesomeIcon icon={faInstagram} />
+            </a>
           </motion.div>
         </Container>
       </Box>

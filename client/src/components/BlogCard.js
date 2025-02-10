@@ -1,10 +1,10 @@
 import React from "react";
-import { Card, CardMedia, Typography, Box, Button } from "@mui/material";
+import { Card, CardMedia, Typography, Box, Button,Chip } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import moment from 'moment';
 
-const BlogCard = ({ id, title, description, image, username, time }) => {
+const BlogCard = ({ id, title, description, image, username, time,tags }) => {
   const navigate = useNavigate();
 
   return (
@@ -65,6 +65,20 @@ const BlogCard = ({ id, title, description, image, username, time }) => {
             <Typography variant="body2" sx={{ color: "#7FFF00" }}>
          {moment(time).isValid() ? moment(time).format('MMM DD') : 'Invalid Date'}
         </Typography>
+
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 2 }}>
+            {tags.split(', ').map((tag, index) => (
+              <Chip
+                key={index}
+                label={tag}
+                sx={{
+                  backgroundColor: '#4bff00',
+                  color: '#000',
+                  fontWeight: 'bold',
+                }}
+              />
+            ))}
+            </Box>
           </Box>
 
           <Button

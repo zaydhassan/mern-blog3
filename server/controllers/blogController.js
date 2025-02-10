@@ -1,6 +1,8 @@
 const blogModel = require("../models/blogModel");
 const userModel = require("../models/userModel");
 const mongoose= require("mongoose");
+const Tag = require("../models/Tag");
+const BlogTag = require("../models/BlogTag");
 
 exports.getTrendingBlogs = async (req, res) => {
   try {
@@ -78,7 +80,7 @@ exports.getAllBlogsController = async (req, res) => {
 
 exports.createBlogController = async(req,res) => {
     try {
-      const { title, description, image,category, status = 'Draft', user } = req.body; 
+      const { title, description, image,category,tags = [], status = 'Draft', user } = req.body; 
         if(!title || !description || !image || !category  || !user) {
             return res.status(400).send({
                 success: false,
@@ -92,12 +94,35 @@ exports.createBlogController = async(req,res) => {
             message:'unable to find user',
         });
      }
-        const newBlog = new blogModel({title, description,image,category, user,status: status || 'Draft', views: 0});
+
+     const tagIds = await Promise.all(
+      tags.map(async (tagName) => {
+        let tag = await Tag.findOne({ tag_name: tagName });
+        if (!tag) {
+          tag = new Tag({ tag_name: tagName });
+        } else {
+          tag.updated_at = Date.now();
+        }
+          await tag.save();
+        return tag._id;
+      })
+    );
+
+        const newBlog = new blogModel({title, description,image,category, tags: tagIds, user,status: status || 'Draft', views: 0});
         const session = await mongoose.startSession();
     session.startTransaction();
     await newBlog.save({ session });
     existingUser.blogs.push(newBlog);
     await existingUser.save({ session });
+
+    await Promise.all(tagIds.map(async (tagId) => {
+      const blogTag = new BlogTag({
+        blog_id: newBlog._id,
+        tag_id: tagId
+      });
+      await blogTag.save({ session });
+    }));
+
     await session.commitTransaction();
         await newBlog.save();
         return res.status(201).send({
@@ -161,16 +186,16 @@ exports.updateBlogController = async (req, res) => {
   exports.getBlogByIdController = async (req, res) => {
     try {
       const { id } = req.params;
-      const blog = await blogModel.findById(id);
+      const blog = await blogModel.findById(id).populate('user', 'username profile_image');
       if (!blog) {
         return res.status(404).send({
           success: false,
-          message: "blog not found with this is",
+          message: "blog not found with this ID",
         });
       }
       return res.status(200).send({
         success: true,
-        message: "fetch single blog",
+        message: "fetched single blog",
         blog,
       });
     } catch (error) {

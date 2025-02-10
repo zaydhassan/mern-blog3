@@ -34,4 +34,21 @@ router.get("/recommendations/:userId", getRecommendedBlogs);
 
 router.get('/category/:category', blogController.getBlogsByCategory);
 
+router.get("/tag/:tagId", async (req, res) => {
+  try {
+    const { tagId } = req.params;
+    const blogs = await require("../models/blogModel").find({ tags: tagId }).populate("tags user");
+
+    if (!blogs.length) {
+      return res.status(404).json({ success: false, message: "No blogs found for this tag" });
+    }
+
+    res.status(200).json({ success: true, blogs });
+  } catch (error) {
+    console.error("Error fetching blogs by tag:", error);
+    res.status(500).json({ success: false, message: "Server error", error: error.toString() });
+  }
+});
+
+
 module.exports = router;
