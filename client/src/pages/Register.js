@@ -9,6 +9,7 @@ import {
   CssBaseline,
   IconButton,
   InputAdornment,
+  MenuItem,
 } from "@mui/material";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -20,6 +21,7 @@ const Register = () => {
     name: "",
     email: "",
     password: "",
+    role: "Reader"
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -42,6 +44,7 @@ const Register = () => {
         username: inputs.name,
         email: inputs.email,
         password: inputs.password,
+        role: inputs.role
       });
       if (data.success) {
         toast.success("Sign up successful. Please log in.");
@@ -181,6 +184,20 @@ const Register = () => {
                 style: { color: "#666" }, 
               }}
             />
+             <TextField
+              select
+              label="Role"
+              fullWidth
+              required
+              name="role"
+              value={inputs.role}
+              onChange={handleChange}
+              variant="outlined"
+            >
+              <MenuItem value="Reader">Reader</MenuItem>
+              <MenuItem value="Writer">Writer</MenuItem>
+              <MenuItem value="Admin">Admin</MenuItem>
+            </TextField>
             <Button
               type="submit"
               fullWidth

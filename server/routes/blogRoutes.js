@@ -1,4 +1,5 @@
 const express = require("express");
+const { isWriter, isReader } = require("../middleware/authMiddleware");
 const {
   getAllBlogsController,
   createBlogController,
@@ -11,20 +12,20 @@ const {
   getBlogsByCategory
 } = require("../controllers/blogController");
 
-const blogController = require("../controllers/blogController");
 const router = express.Router();
+const blogController = require("../controllers/blogController");
 
-router.get("/all-blog", getAllBlogsController);
+router.get("/all-blog", isReader,getAllBlogsController);
 
-router.post("/create-blog", createBlogController);
+router.post("/create-blog", isWriter, createBlogController);
 
-router.put("/update-blog/:id", updateBlogController);
+router.put("/update-blog/:id", isWriter, updateBlogController);
 
-router.get("/get-blog/:id", getBlogByIdController);
+router.get("/get-blog/:id",isReader, getBlogByIdController);
 
 router.get("/user-drafts/:userId", blogController.getUserDrafts);
 
-router.delete("/delete-blog/:id", deleteBlogController);
+router.delete("/delete-blog/:id", isWriter,deleteBlogController);
 
 router.get('/user-blog/:id',userBlogController);
 
@@ -49,6 +50,5 @@ router.get("/tag/:tagId", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error", error: error.toString() });
   }
 });
-
 
 module.exports = router;

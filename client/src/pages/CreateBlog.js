@@ -29,6 +29,7 @@ const categories = ['Technology', 'Education', 'Health', 'Entertainment', 'Food'
 const CreateBlog = () => {
   const theme = useTheme();
   const navigate = useNavigate();
+  const userRole = localStorage.getItem('userRole');
   const id = localStorage.getItem("userId");
   const [inputs, setInputs] = useState({ title: "", description: "", image: "", category: "" });
   const [uploadedImage, setUploadedImage] = useState(null);
@@ -45,6 +46,13 @@ const CreateBlog = () => {
       resetTranscript();
     }
   }, [transcript,quill,resetTranscript]);
+
+  useEffect(() => {
+    if (userRole !== 'Writer') {
+      toast.error('Only Writers can create blogs');
+      navigate('/');
+    }
+  }, [navigate, userRole]);
 
   useEffect(() => {
     const editorContainer = quillRef.current;

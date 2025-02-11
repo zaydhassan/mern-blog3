@@ -37,7 +37,7 @@ const BlogDetails = () => {
     const fetchBlogDetails = async () => {
       try {
         const response = await axios.get(`/api/v1/blog/get-blog/${id}`);
-        console.log("Fetched Blog Details:", response.data.blog);  // Debugging log
+        console.log("Fetched Blog Details:", response.data.blog);  
         if (response.data.success) {
           setBlog(response.data.blog);
         } else {
@@ -68,48 +68,68 @@ const BlogDetails = () => {
 
   const handleLike = async () => {
     try {
-      const { data } = await axios.post(`/api/v1/likes`, { blog_id: id });
+      let currentUser = user || JSON.parse(localStorage.getItem('user') || '{}');
+  
+      if (!currentUser || !currentUser.role) {
+        toast.error("User data not available.");
+        return;
+      }
+  
+      if (currentUser.role !== 'Reader') {
+        toast.error("Only Readers can like blogs.");
+        return;
+      }
+  
+      const { data } = await axios.post(`/api/v1/likes`, { blog_id: id }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}` 
+        }
+      });
+  
       if (data.success) {
         setLiked(!liked);
         setLikeCount(liked ? likeCount - 1 : likeCount + 1);
         toast.success(liked ? "Like removed!" : "Liked!");
       }
     } catch (error) {
-      toast.error("Error updating like");
+      console.error("Error in handleLike:", error.response || error);
+      toast.error(error.response?.data?.message || "Error updating like");
     }
   };
+  
 
   const handleComment = async () => {
-    if (!newComment) {
+    if (!newComment.trim()) {
       toast.error("Please write a comment before posting.");
       return;
     }
-
-    let currentUser = user;
-    if (!currentUser) {
-      const storedUser = localStorage.getItem('user');
-      currentUser = storedUser ? JSON.parse(storedUser) : null;
-    }
-
-    if (!currentUser || !currentUser.username) {
+  
+    let currentUser = user || JSON.parse(localStorage.getItem('user') || '{}');
+  
+    if (!currentUser || !currentUser._id || !currentUser.role) {
       toast.error("User data not available.");
       return;
     }
-
+  
+    if (currentUser.role !== 'Reader') {
+      toast.error("Only Readers can leave comments.");
+      return;
+    }
+  
     const formattedDate = moment().format("MMM DD");
-
+  
     try {
       const { data, status } = await axios.post(`/api/v1/comments`, {
-        content: newComment,
+        content: newComment.trim(),
         blog_id: id,
         user_id: currentUser._id
       });
-
+  
       if (status === 201 && data) {
         setComments([
           ...comments,
           {
-            text: newComment,
+            text: newComment.trim(),
             user: {
               username: currentUser.username,
               avatar: currentUser.profile_image || "",
@@ -126,7 +146,7 @@ const BlogDetails = () => {
       toast.error(error.response?.data?.message || "Error adding comment");
     }
   };
-
+  
   const toggleComments = () => {
     setCommentsOpen((prev) => !prev);
   };

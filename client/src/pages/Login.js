@@ -14,7 +14,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import axios from "axios";
 import { useDispatch } from "react-redux";
 import { authActions } from "../redux/store";
-import toast from "react-hot-toast";
+import NotificationBanner from "./NotificationBanner";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -25,6 +25,9 @@ const Login = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [showBanner, setShowBanner] = useState(false);
+  const [bannerMessage, setBannerMessage] = useState(""); 
+  const [showWavingHand, setShowWavingHand] = useState(false); 
 
   const handleChange = (e) => {
     setInputs((prevState) => ({
@@ -47,13 +50,18 @@ const Login = () => {
 
       if (data.success) {
         localStorage.setItem("userId", data.user._id);
+        localStorage.setItem("userRole", data.user.role);
         dispatch(authActions.login(data.user));
-        toast.success("Logged in successfully!");
-        navigate("/");
+
+        setBannerMessage(`Welcome back, ${data.user.username || "User"} `);
+        setShowWavingHand(true); 
+        setShowBanner(true);
+        setTimeout(() => navigate("/"), 3000); 
       }
     } catch (error) {
-      toast.error("Login failed!");
-      console.log(error);
+      setBannerMessage("Login failed! Please try again.");
+      setShowWavingHand(false); 
+      setShowBanner(true);
     }
   };
 
@@ -102,7 +110,10 @@ const Login = () => {
           >
             LOGIN
           </Typography>
-
+          <div>
+      {showBanner && (
+        <NotificationBanner message={bannerMessage} showHand={showWavingHand} />
+      )}
           <form style={{ width: "100%" }} onSubmit={handleSubmit}>
             <TextField
               label="Email Address"
@@ -208,6 +219,7 @@ const Login = () => {
               </Link>
             </Typography>
           </form>
+          </div>
         </Paper>
       </Grid>
     </Grid>

@@ -207,6 +207,7 @@ exports.updateBlogController = async (req, res) => {
       });
     }
   };
+  
   exports.deleteBlogController = async (req, res) => {
     try {
       const blog = await blogModel.findById(req.params.id);
