@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { styled, Box } from '@mui/system';
 import { TextField, Button, Typography } from '@mui/material';
 import './HomePage.css';
@@ -35,10 +35,26 @@ const blogs = [
   { id: 6, title: "Responsive Design Tips", summary: "Techniques to make your website responsive on all devices.", image: "/tech6.jpeg" },
 ];
 
+const heroImages = [
+  '/hero.jpg',
+  '/hero1.jpg',
+  '/hero2.jpg',
+  '/hero3.jpg'
+];
+
 const Home = () => {
   const [email, setEmail] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % heroImages.length);
+    },2000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSubscribe = async () => {
     if (email.trim() === '') {
@@ -48,7 +64,6 @@ const Home = () => {
     }
     try {
       const response = await axios.post('http://localhost:8080/api/v1/newsletter/subscribe', { email });
-
       if (response.data.success) {
         setSuccessMessage('Thank you for subscribing! 🎉');
         setErrorMessage('');
@@ -67,10 +82,7 @@ const Home = () => {
       <div
         className="HeroSection"
         style={{
-          backgroundImage: 'url(/hero.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          color: '#fff',
+          backgroundImage: `url(${heroImages[currentImageIndex]})`,
         }}
       >
         <h1>A Blog for Passionate People and Website Lovers</h1>
@@ -114,12 +126,11 @@ const Home = () => {
             </Typography>
           )}
 
-{errorMessage && (
-          <Typography variant="subtitle1" sx={{ mt: 2, color: 'red' }}>
-            {errorMessage}
-          </Typography>
-        )}
-
+          {errorMessage && (
+            <Typography variant="subtitle1" sx={{ mt: 2, color: 'red' }}>
+              {errorMessage}
+            </Typography>
+          )}
         </div>
       </div>
 

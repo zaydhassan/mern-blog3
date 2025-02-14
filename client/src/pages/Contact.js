@@ -5,11 +5,14 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { db } from '../firebase/firebaseConfig';
 import { collection, addDoc } from 'firebase/firestore';
+import toast from 'react-hot-toast';
+import { useTheme } from '@mui/material/styles';
 
 export default function Contact() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
+    const theme = useTheme();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -20,7 +23,7 @@ export default function Contact() {
                 message: message,
                 timestamp: new Date()
             });
-            alert('Message sent successfully!');
+            toast.success('Message sent successfully!');
             setName('');
             setEmail('');
             setMessage('');
@@ -99,10 +102,24 @@ export default function Contact() {
                             margin="normal"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            InputProps={{
-                                style: { color: '#FFFFFF' }
-                            }}
-                        />
+                           sx={{
+    input: {
+      color: theme.palette.mode === "dark" ? "#FFFFFF" : "#000000", 
+      backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)", 
+      padding: "12px",
+      borderRadius: "8px",
+    },
+    fieldset: {
+      borderColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.3)", 
+    },
+  }}
+  InputLabelProps={{
+    style: { 
+      color: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)", 
+      fontWeight: "bold",
+    }
+  }}
+/>
                         <TextField
                             required
                             fullWidth
@@ -113,10 +130,24 @@ export default function Contact() {
                             margin="normal"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            InputProps={{
-                                style: { color: '#FFFFFF' }
-                            }}
-                        />
+                            sx={{
+                                input: {
+                                  color: theme.palette.mode === "dark" ? "#FFFFFF" : "#000000", 
+                                  backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)", // Light grey in light mode
+                                  padding: "12px",
+                                  borderRadius: "8px",
+                                },
+                                fieldset: {
+                                  borderColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.3)", 
+                                },
+                              }}
+                              InputLabelProps={{
+                                style: { 
+                                  color: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)", 
+                                  fontWeight: "bold",
+                                }
+                              }}
+                            />
                         <TextField
                             required
                             fullWidth
@@ -128,15 +159,29 @@ export default function Contact() {
                             margin="normal"
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
-                            InputProps={{
-                                style: { color: '#FFFFFF' }
-                            }}
-                        />
+                            sx={{
+                                input: {
+                                  color: theme.palette.mode === "dark" ? "#FFFFFF" : "#000000", 
+                                  backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)", // Light grey in light mode
+                                  padding: "12px",
+                                  borderRadius: "8px",
+                                },
+                                fieldset: {
+                                  borderColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.6)" : "rgba(0, 0, 0, 0.3)", 
+                                },
+                              }}
+                              InputLabelProps={{
+                                style: { 
+                                  color: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.7)" : "rgba(0, 0, 0, 0.7)", 
+                                  fontWeight: "bold",
+                                }
+                              }}
+                            />
                         <Button
                             type="submit"
                             fullWidth
                             variant="contained"
-                            sx={{ mt: 3, mb: 2, backgroundColor: '#1a73e8' }} // Use a consistent button color
+                            sx={{ mt: 3, mb: 2, backgroundColor: '#1a73e8' }} 
                         >
                             Send Message
                         </Button>

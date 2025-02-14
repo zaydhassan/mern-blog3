@@ -69,6 +69,7 @@ app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/comments", commentRoutes); 
 app.use("/api/v1/likes", likeRoutes); 
 app.use("/uploads", express.static("uploads"));
+app.use("/api/v1/comments", commentRoutes); 
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

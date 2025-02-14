@@ -6,6 +6,10 @@ const {
   loginController,
   updateUser,
   uploadImage,
+  updateUserPoints,
+  getLeaderboard,
+  updateLikePoints,
+  getUserProfile
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -20,5 +24,10 @@ router.post("/login", loginController);
 router.put('/:userId', updateUser);
 
 router.post("/upload-image", upload.single("image"), uploadImage);
+
+router.post("/update-points", updateUserPoints);
+router.get("/leaderboard", getLeaderboard);
+router.post("/update-like-points", updateLikePoints);
+router.get("/:id", getUserProfile);
 
 module.exports = router;

@@ -196,7 +196,6 @@ const Register = () => {
             >
               <MenuItem value="Reader">Reader</MenuItem>
               <MenuItem value="Writer">Writer</MenuItem>
-              <MenuItem value="Admin">Admin</MenuItem>
             </TextField>
             <Button
               type="submit"

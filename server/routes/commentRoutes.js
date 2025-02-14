@@ -1,11 +1,13 @@
 const express = require("express");
-const { createComment, getCommentsByBlog } = require("../controllers/commentController");
-const commentController = require('../controllers/commentController');
+const commentController = require("../controllers/commentController"); // ✅ Ensure correct import
+
 const router = express.Router();
 
-router.post("/", createComment);
-router.get("/:blogId", getCommentsByBlog);
-router.put('/:commentId', commentController.updateComment); 
-router.delete('/:commentId', commentController.deleteComment);
+router.post("/", commentController.createComment);
+router.get("/:blogId", commentController.getCommentsByBlog);
+router.put("/:commentId", commentController.updateComment);
+router.delete("/:commentId", commentController.deleteComment);
+router.post("/report", commentController.reportComment);
+router.get("/reported", commentController.getReportedComments); // ✅ Ensure this function exists
 
 module.exports = router;

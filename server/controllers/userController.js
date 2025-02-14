@@ -5,7 +5,7 @@ const path = require("path");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/"); // Save to 'uploads' directory
+    cb(null, "uploads/"); 
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1E9);
@@ -174,5 +174,124 @@ exports.loginController = async (req, res) => {
       message: "Error In Login Callcback",
       error,
     });
+  }
+};
+
+const getLevel = (points) => {
+  if (points >= 3000) return "Master Storyteller";
+  if (points >= 1000) return "Influencer";
+  if (points >= 500) return "Engaged Contributor";
+  return "Aspiring Wordsmith";
+};
+
+const getBadges = (points) => {
+  let badges = [];
+  if (points >= 500) badges.push("Engaged Reader");
+  if (points >= 1000) badges.push("Top Contributor");
+  if (points >= 5000) badges.push("Elite Writer");
+  return badges;
+};
+
+exports.updateUserPoints = async (req, res) => {
+  const { userId, activityType } = req.body;
+
+  const pointValues = {
+    writer: {
+      publishArticle: 50,
+      receiveLike: 10,
+      receiveComment: 5
+    },
+    reader: {
+      readArticle: 10,
+      likeArticle: 5,
+      commentArticle: 10,
+      shareArticle: 15,
+    }
+  };
+
+  try {
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    const pointsEarned = pointValues[user.role.toLowerCase()][activityType] || 0;
+    user.points += pointsEarned;
+    user.level = getLevel(user.points);
+    user.badges = getBadges(user.points);
+
+    await user.save();
+    res.json({ success: true, points: user.points, level: user.level, badges: user.badges });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error updating points", error });
+  }
+};
+
+exports.getLeaderboard = async (req, res) => {
+  try {
+    
+    const topWriters = await userModel.find({ role: "Writer", points: { $gt: 0 } }).sort({ points: -1 }).limit(10);
+    const topReaders = await userModel.find({ role: "Reader", points: { $gt: 0 } }).sort({ points: -1 }).limit(10);
+
+    console.log("Top Writers Found:", topWriters);
+    console.log("Top Readers Found:", topReaders);
+
+    res.json({
+      success: true,
+      topWriters,
+      topReaders,
+    });
+  } catch (error) {
+    console.error("Error fetching leaderboard:", error);
+    res.status(500).json({ success: false, message: "Error fetching leaderboard" });
+  }
+};
+
+exports.updateLikePoints = async (req, res) => {
+  const { userId, liked } = req.body;
+
+  try {
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    if (liked) {
+      user.points += 5;  
+    } else {
+      user.points -= 5; 
+      if (user.points < 0) user.points = 0;  
+    }
+
+    user.level = getLevel(user.points);
+    user.badges = getBadges(user.points);
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: `Points updated for ${liked ? "liking" : "unliking"} a blog`,
+      points: user.points,
+      level: user.level,
+      badges: user.badges
+    });
+  } catch (error) {
+    console.error("Error updating like points:", error);
+    res.status(500).json({ success: false, message: "Error updating points" });
+  }
+};
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: "User not found" });
+
+    res.json({
+      success: true,
+      user: {
+        points: user.points,
+        level: user.level,
+        badges: user.badges
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ success: false, message: "Error fetching user data" });
   }
 };

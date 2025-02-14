@@ -59,10 +59,10 @@ const BlogCard = ({ id, title, description, image, username, time,tags }) => {
           </Typography>
 
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 2 }}>
-            <Typography variant="body2" sx={{ color: "#9dff00" }}>
+            <Typography variant="body2" sx={{ color: "#7FFFD4" }}>
               By {username}
             </Typography>
-            <Typography variant="body2" sx={{ color: "#7FFF00" }}>
+            <Typography variant="body2" sx={{ color: "#7FFFD4" }}>
          {moment(time).isValid() ? moment(time).format('MMM DD') : 'Invalid Date'}
         </Typography>
 
@@ -72,7 +72,7 @@ const BlogCard = ({ id, title, description, image, username, time,tags }) => {
                 key={index}
                 label={tag}
                 sx={{
-                  backgroundColor: '#4bff00',
+                  backgroundColor: '#7FFFD4',
                   color: '#000',
                   fontWeight: 'bold',
                 }}
@@ -84,7 +84,7 @@ const BlogCard = ({ id, title, description, image, username, time,tags }) => {
           <Button
             variant="contained"
             sx={{
-              backgroundColor: '#32CD32',
+              backgroundColor: '#7FFF00',
               color: '#000',
               borderRadius: '20px',
               padding: '5px 15px',

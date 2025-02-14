@@ -91,7 +91,7 @@ useEffect(() => {
       box-shadow: 0 0 25px #9dff00, 0 0 50px #9dff00, 0 0 100px #9dff00, 0 0 250px rgba(0, 0, 0, 0.8);
     }
           .custom-search-box {
-            width: 300px;
+            width: 310px;
             padding: 5px 20px;
             background-color: #fff;
             border-radius: 50px;
@@ -130,21 +130,29 @@ useEffect(() => {
 
        <Box display="flex" justifyContent="center" marginBottom={4}>
         <Box className="custom-search-box">
-          <TextField
-            placeholder="Search blogs..."
-            variant="standard"
-            fullWidth
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon style={{ color: '#555' }} />
-                </InputAdornment>
-              ),
-              disableUnderline: true
-            }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <TextField
+        placeholder="Search blogs..."
+         variant="standard"
+          fullWidth
+        InputProps={{
+           startAdornment: (
+           <InputAdornment position="start">
+           <SearchIcon style={{ color: "#333" }} /> 
+          </InputAdornment>
+          ),
+    disableUnderline: true,
+    sx: {
+      "&::placeholder": {
+        color: "#fff !important", 
+        opacity: 1,
+      },
+      color: "#000", 
+
+    },
+  }}
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+/>
         </Box>
       </Box>
 

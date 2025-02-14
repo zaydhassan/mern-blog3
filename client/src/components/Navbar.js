@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { AppBar, Toolbar, Typography, IconButton, Button, Avatar, MenuItem, Select, Menu } from "@mui/material";
+import { AppBar, Toolbar, Typography, IconButton, Button, Avatar, MenuItem, Menu } from "@mui/material";
 import NightsStayIcon from '@mui/icons-material/NightsStay';
 import Brightness5Icon from '@mui/icons-material/Brightness5';
 import toast from "react-hot-toast";
@@ -15,17 +15,15 @@ const Navbar = () => {
   const user = useSelector((state) => state.auth.user);
   const { theme, toggleTheme } = useTheme();
   const dispatch = useDispatch();
-  const [language, setLanguage] = useState("en");
   const location = useLocation(); 
   const [anchorEl, setAnchorEl] = useState(null);
+  const isWriter = user?.role?.toLowerCase() === "writer";
 
   useEffect(() => {
     setAnchorEl(null);
-    console.log("Location changed, menu closed");
   }, [location]);
 
   const handleMenu = (event) => {
-    console.log("Avatar clicked");
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
@@ -48,9 +46,12 @@ const Navbar = () => {
     }
   };
 
-  const handleLanguageChange = (event) => {
-    setLanguage(event.target.value);
-    toast.success(`Language changed to ${event.target.value.toUpperCase()}`);
+  const handleRestrictedNavigation = (path) => {
+    if (isWriter) {
+      navigate(path);
+    } else {
+      toast.error("Login as a writer to access this feature");
+    }
   };
 
   return (
@@ -74,22 +75,6 @@ const Navbar = () => {
         {isLogin && (
           <>
             <IconButton onClick={toggleTheme} color="inherit">{theme === 'light' ? <Brightness5Icon /> : <NightsStayIcon />}</IconButton>
-            <Select
-              value={language}
-              onChange={handleLanguageChange}
-              style={{ marginRight: '10px', color: 'inherit' }}
-            >
-              <MenuItem value="en">English</MenuItem>
-              <MenuItem value="es">Spanish</MenuItem>
-              <MenuItem value="fr">French</MenuItem>
-              <MenuItem value="de">German</MenuItem>
-              <MenuItem value="hi">Hindi</MenuItem>
-              <MenuItem value="zh">Chinese</MenuItem>
-              <MenuItem value="ja">Japanese</MenuItem>
-              <MenuItem value="ru">Russian</MenuItem>
-              <MenuItem value="ar">Arabic</MenuItem>
-              <MenuItem value="it">Italian</MenuItem>
-            </Select>
             <Avatar
               src={user?.profile_image || "/default-avatar.png"}
               alt="Profile"
@@ -105,8 +90,10 @@ const Navbar = () => {
               onClose={handleClose}
             >
               <MenuItem onClick={() => { handleNavigation('/profile'); handleClose(); }}>Profile</MenuItem>
-              <MenuItem onClick={() => { handleNavigation('/my-blogs'); handleClose(); }}>My Blogs</MenuItem>
-              <MenuItem onClick={() => { handleNavigation('/create-blog'); handleClose(); }}>Create Blog</MenuItem>
+              
+              <MenuItem onClick={() => { handleRestrictedNavigation('/my-blogs'); handleClose(); }}>My Blogs</MenuItem>
+              <MenuItem onClick={() => { handleRestrictedNavigation('/create-blog'); handleClose(); }}>Create Blog</MenuItem>
+              
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </>

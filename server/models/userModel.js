@@ -35,6 +35,18 @@ const userSchema = new mongoose.Schema(
         ref:"Blog",
       },
     ],
+    points: {
+      type: Number,
+      default: 0
+    },
+    level: {
+      type: String,
+      default: "Beginner"
+    },
+    badges: {
+      type: [String],
+      default: []
+    }
   },
   { timestamps: true }
 );
