@@ -14,6 +14,7 @@ import {
 import axios from "axios";
 import toast from "react-hot-toast";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import API_BASE_URL from "../api/api";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post("/api/v1/user/register", {
+      const { data } = await axios.post(`${API_BASE_URL}/api/v1/user/register`, {
         username: inputs.name,
         email: inputs.email,
         password: inputs.password,

@@ -11,6 +11,7 @@ import ArticleIcon from '@mui/icons-material/Article';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import axios from 'axios';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import API_BASE_URL from "../api/api";
 
 const Profile = () => {
   const user = useSelector(state => state.auth.user);
@@ -36,7 +37,7 @@ const Profile = () => {
   const fetchUserStats = useCallback(async () => {
     try {
       console.log("Fetching updated user stats...");
-      const response = await axios.get(`/api/v1/user/${user._id}`);
+      const response = await axios.get(`${API_BASE_URL}/api/v1/user/${user._id}`);
       if (response.data.success) {
         setPoints(response.data.user.points || 0);
         setLevel(response.data.user.level || "Beginner");
@@ -51,7 +52,7 @@ const Profile = () => {
 
    const fetchLeaderboard = useCallback(async () => {
     try {
-      const response = await axios.get(`/api/v1/user/leaderboard`);
+      const response = await axios.get(`${API_BASE_URL}/api/v1/user/leaderboard`);
       if (response.data.success) {
         setTopWriters(response.data.topWriters || []);
         setTopReaders(response.data.topReaders || []);
@@ -101,7 +102,7 @@ const Profile = () => {
       formData.append('image', selectedImage);
 
       try {
-        const imageResponse = await fetch('/api/v1/user/upload-image', {
+        const imageResponse = await fetch(`${API_BASE_URL}/api/v1/user/upload-image`, {
           method: 'POST',
           body: formData,
         });

@@ -8,6 +8,7 @@ import Quill from 'quill';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import API_BASE_URL from "../api/api"; 
 
 const StyledFormBox = styled(Box)(({ theme }) => ({
   width: "55%",
@@ -130,7 +131,7 @@ const CreateBlog = () => {
     }
 
     try {
-      const response = await axios.post("/api/v1/blog/create-blog", payload);
+      const response = await axios.post(`${API_BASE_URL}/api/v1/blog/create-blog`, payload);
       if (response.data.success) {
         toast.success(`Blog ${status === 'Published' ? 'published' : 'saved as draft'}`, { icon: '👏' });
         navigate("/my-blogs");
