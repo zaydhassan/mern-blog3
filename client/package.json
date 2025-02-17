@@ -21,14 +21,15 @@
     "firebase": "^11.2.0",
     "flowbite-react": "^0.10.2",
     "framer-motion": "^12.0.0",
+    "i18next-browser-languagedetector": "^8.0.2",
+    "i18next-http-backend": "^3.0.2",
     "moment": "^2.30.1",
     "mongoose": "^8.9.4",
     "postcss": "^8.4.49",
     "quill": "^2.0.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-hot-toast": "^2.5.1",
-    "react-i18next": "^15.4.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.1.1",
     "react-scripts": "5.0.1",
@@ -48,6 +49,44 @@
     "extends": [
       "react-app",
       "react-app/jest"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "**/*.ts",
+          "**/*.tsx"
+        ],
+        "parser": "@typescript-eslint/parser",
+        "parserOptions": {
+          "ecmaVersion": 2018,
+          "sourceType": "module",
+          "ecmaFeatures": {
+            "jsx": true
+          },
+          "warnOnUnsupportedTypeScriptVersion": true
+        },
+        "plugins": [
+          "@typescript-eslint"
+        ],
+        "rules": {
+          "default-case": "off",
+          "no-dupe-class-members": "off",
+          "@typescript-eslint/no-angle-bracket-type-assertion": "warn",
+          "no-array-constructor": "off",
+          "@typescript-eslint/no-array-constructor": "warn",
+          "@typescript-eslint/no-namespace": "error",
+          "no-unused-vars": "off",
+          "@typescript-eslint/no-unused-vars": [
+            "warn",
+            {
+              "args": "none",
+              "ignoreRestSiblings": true
+            }
+          ],
+          "no-useless-constructor": "off",
+          "@typescript-eslint/no-useless-constructor": "warn"
+        }
+      }
     ]
   },
   "browserslist": {
@@ -64,6 +103,6 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "typescript": "^5.1.6"
+    "typescript": "^4.9.5"
   }
 }

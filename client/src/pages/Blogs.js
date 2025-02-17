@@ -7,7 +7,6 @@ import {
 } from '@mui/material';
 import BlogCard from '../components/BlogCard'; 
 import SearchIcon from '@mui/icons-material/Search';
-import API_BASE_URL from "../api/api";
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -30,9 +29,7 @@ const fetchBlogs = async () => {
     const categoryPath = location.pathname;
     const isCategoryPage = categoryPath.startsWith('/category/');
     const category = isCategoryPage ? categoryPath.split('/').pop() : '';
-    const endpoint = isCategoryPage 
-    ? `${API_BASE_URL}/api/v1/blog/category/${category}` 
-    : `${API_BASE_URL}/api/v1/blog/all-blog`;
+    const endpoint = isCategoryPage ? `/api/v1/blog/category/${category}` : '/api/v1/blog/all-blog';
     
     const { data } = await axios.get(endpoint);
     if (data.success) {
