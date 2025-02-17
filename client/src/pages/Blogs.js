@@ -7,7 +7,6 @@ import {
 } from '@mui/material';
 import BlogCard from '../components/BlogCard'; 
 import SearchIcon from '@mui/icons-material/Search';
-import API_BASE_URL from "../api/api";
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -30,16 +29,14 @@ const fetchBlogs = async () => {
     const categoryPath = location.pathname;
     const isCategoryPage = categoryPath.startsWith('/category/');
     const category = isCategoryPage ? categoryPath.split('/').pop() : '';
-    const endpoint = isCategoryPage 
-    ? `${API_BASE_URL}/api/v1/blog/category/${category}` 
-    : `${API_BASE_URL}/api/v1/blog/all-blog`;
-    
+    const endpoint = isCategoryPage ? `${process.env.REACT_APP_API_URL}/api/v1/blog/category/${category}` : `${process.env.REACT_APP_API_URL}/api/v1/blog/all-blog`;
+
     const { data } = await axios.get(endpoint);
     if (data.success) {
       const formattedBlogs = data.blogs.map(blog => ({
         ...blog,
-        created_at: moment(blog.created_at).format('MMM DD'),
-        userAvatar: blog.user.profile_image 
+        userAvatar: blog.user ? blog.user.profile_image : "/default-avatar.png", 
+        username: blog.user ? blog.user.username : "Unknown Author"
       }));
       setBlogs(formattedBlogs);
       setFilteredBlogs(formattedBlogs);

@@ -16,7 +16,9 @@ connectDB();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'https://mern-blog-final-ui.onrender.com'
+}));
 app.use(express.json());
 app.use(morgan("dev"));
 
