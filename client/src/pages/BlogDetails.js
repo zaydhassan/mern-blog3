@@ -39,9 +39,9 @@ const BlogDetails = () => {
 
   const fetchBlogDetails = async () => {
     try {
-      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/blog/get-blog/${id}`);
-const likeResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/likes/${id}`);
-const commentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/comments/${id}`);
+      const response = await axios.get(`/api/v1/blog/get-blog/${id}`);
+      const likeResponse = await axios.get(`/api/v1/likes/${id}`);
+      const commentResponse = await axios.get(`/api/v1/comments/${id}`);
 
       if (response.data.success) {
         setBlog(response.data.blog);
@@ -76,7 +76,7 @@ const commentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1
 
     const fetchRecommendations = async () => {
       try {
-        const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/blog/all-blog`);
+        const { data } = await axios.get("/api/v1/blog/all-blog");
         if (data.success) {
           setRecommendations(data.blogs.slice(0, 5));
         }
@@ -99,7 +99,7 @@ const commentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1
       }
   
       const { data } = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/v1/likes/toggle`,
+        `/api/v1/likes/toggle`,
         { blog_id: id, user_id: currentUser._id },
         {
           headers: {
@@ -112,7 +112,7 @@ const commentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1
         setLiked(data.liked); 
         setLikeCount(data.likeCount); 
 
-        await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/user/update-like-points`, { 
+        await axios.post("/api/v1/user/update-like-points", { 
           userId: currentUser._id, 
           liked: data.liked
         });
@@ -124,7 +124,7 @@ const commentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1
           { icon: data.liked ? "👍" : "👎" }
         );
       }
-        const likeResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/likes/${id}`);
+        const likeResponse = await axios.get(`/api/v1/likes/${id}`);
         if (likeResponse.data.success) {
           const likes = likeResponse.data.likes;
           setLikeCount(likes.length);
@@ -158,7 +158,7 @@ const commentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1
     }
   
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/comments`, {
+      const response = await axios.post(`/api/v1/comments`, {
         content: newComment.trim(),
         blog_id: id,
         user_id: currentUser._id,
@@ -169,7 +169,7 @@ const commentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1
         toast.success("Comment added!");
         setNewComment("");
 
-        const commentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/comments/${id}`);
+        const commentResponse = await axios.get(`/api/v1/comments/${id}`);
         if (commentResponse.data.success) {
           setComments(commentResponse.data.comments);
           setCommentCount(commentResponse.data.commentCount);
@@ -198,7 +198,7 @@ const commentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1
     }
   
     try {
-      const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/v1/comments/${commentId}`, { content: updatedText });
+      const response = await axios.put(`/api/v1/comments/${commentId}`, { content: updatedText });
   
       if (response.status === 200) {
         setComments(comments.map(comment =>
@@ -215,7 +215,7 @@ const commentResponse = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1
   
   const handleDelete = async (commentId) => {
     try {
-      const response = await axios.delete(`${process.env.REACT_APP_API_URL}/api/v1/comments/${commentId}`);
+      const response = await axios.delete(`/api/v1/comments/${commentId}`);
   
       if (response.status === 204) {
         setComments(comments.filter(comment => comment._id !== commentId));
@@ -247,7 +247,7 @@ const handleReport = async (commentId, commentUserId) => {
   }
 
   try {
-    const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/comments/report`, {
+    const response = await axios.post(`/api/v1/comments/report`, {
       commentId: commentId, 
       userId: currentUser._id, 
     });
@@ -267,7 +267,7 @@ const handleReport = async (commentId, commentUserId) => {
   const handleReply = async (commentId, replyContent) => {
     if (!replyContent) return toast.error("Reply cannot be empty.");
     try {
-      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/comments/reply`, { parentId: commentId, content: replyContent });
+      const { data } = await axios.post(`/api/v1/comments/reply`, { parentId: commentId, content: replyContent });
       setComments((prev) =>
         prev.map((c) => (c.id === commentId ? { ...c, replies: [...c.replies, data] } : c))
       );

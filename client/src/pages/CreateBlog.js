@@ -130,7 +130,7 @@ const CreateBlog = () => {
     }
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/v1/blog/create-blog`, payload);
+      const response = await axios.post("/api/v1/blog/create-blog", payload);
       if (response.data.success) {
         toast.success(`Blog ${status === 'Published' ? 'published' : 'saved as draft'}`, { icon: '👏' });
         navigate("/my-blogs");
