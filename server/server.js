@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const dotenv = require("dotenv");
+const path = require('path');
 const connectDB = require("./config/db");
 const nodemailer = require("nodemailer");
 
@@ -16,9 +17,17 @@ connectDB();
 
 const app = express();
 
+const allowedOrigins = ['https://mern-blog-final-ui.onrender.com'];
 app.use(cors({
-  origin: 'https://mern-blog-final-ui.onrender.com'
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  }
 }));
+
 app.use(express.json());
 app.use(morgan("dev"));
 
@@ -68,14 +77,18 @@ app.post("/api/v1/newsletter/subscribe", (req, res) => {
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
-app.use("/api/v1/comments", commentRoutes); 
-app.use("/api/v1/likes", likeRoutes); 
+app.use("/api/v1/comments", commentRoutes);
+app.use("/api/v1/likes", likeRoutes);
 app.use("/uploads", express.static("uploads"));
-app.use("/api/v1/comments", commentRoutes); 
 
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'build', 'index.html'));
+});
+
+const DEV_MODE = process.env.DEV_MODE || 'production';
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-    console.log(
-      `Server Running on ${process.env.DEV_MODE} mode port no ${PORT}`
-    );
+  console.log(`Server Running in ${DEV_MODE} mode on port ${PORT}`);
 });
