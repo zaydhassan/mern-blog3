@@ -15,7 +15,7 @@ const {
 const router = express.Router();
 const blogController = require("../controllers/blogController");
 
-router.get("/all-blog", isReader,getAllBlogsController);
+router.get("/all-blog", getAllBlogsController);
 
 router.post("/create-blog", isWriter, createBlogController);
 
