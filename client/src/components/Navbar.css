@@ -116,10 +116,6 @@
   transition: transform 0.5s ease;
 }
 
-.navbar .MuiTypography-root:hover {
-  transform: scale(1.1) translateY(-5px);
-}
-
 .navbar .MuiButton-root {
   font-size: 1.2rem;
   font-weight: 500;
@@ -138,10 +134,6 @@
 .navbar .MuiIconButton-root {
   color: inherit;
   transition: transform 0.3s ease;
-}
-
-.navbar .MuiIconButton-root:hover {
-  transform: rotate(45deg);
 }
 
 .navbar .MuiButton-contained {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { AppBar, Toolbar, Typography, IconButton, Button, Avatar, MenuItem, Menu } from "@mui/material";
+import { AppBar, Toolbar, IconButton, Button, Avatar, MenuItem, Menu } from "@mui/material";
 import NightsStayIcon from '@mui/icons-material/NightsStay';
 import Brightness5Icon from '@mui/icons-material/Brightness5';
 import toast from "react-hot-toast";
@@ -57,13 +57,15 @@ const Navbar = () => {
   return (
     <AppBar position="static" className={`navbar ${theme}`}>
       <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Typography
-          variant="h6"
-          onClick={() => navigate('/')}
-          style={{ cursor: 'pointer' }}
-        >
-          My Blog APP
-        </Typography>
+      <IconButton
+  edge="start"
+  color="inherit"
+  aria-label="logo"
+  onClick={() => navigate('/')}
+  style={{ cursor: 'pointer' }}
+>
+  <img src="polysia.jpeg" alt="Logo" style={{ height: '55px' }} />  
+</IconButton>
 
         <div style={{ flexGrow: 1, justifyContent: 'center', display: 'flex' }}>
           <Button className={location.pathname === "/" ? "active" : ""} onClick={() => navigate("/")} color="inherit">Home</Button>
