@@ -35,8 +35,8 @@ const fetchBlogs = async () => {
     if (data.success) {
       const formattedBlogs = data.blogs.map(blog => ({
         ...blog,
-        userAvatar: blog.user ? blog.user.profile_image : "/default-avatar.png", 
-        username: blog.user ? blog.user.username : "Unknown Author"
+        created_at: moment(blog.created_at).format('MMM DD'),
+        userAvatar: blog.user.profile_image 
       }));
       setBlogs(formattedBlogs);
       setFilteredBlogs(formattedBlogs);
