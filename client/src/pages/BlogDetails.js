@@ -338,7 +338,7 @@ const handleReport = async (commentId, commentUserId) => {
       />
 
 <Box display="flex" alignItems="center" gap={2} marginBottom={2}>
-        <Avatar src={blog?.user?.profile_image || "/default-avatar.png"} />
+<Avatar src={blog?.user?.profile_image || "/default-avatar.png"} />
         <Box>
           <Typography variant="subtitle1" fontWeight="bold">
             {blog?.user?.username || "Unknown Author"}

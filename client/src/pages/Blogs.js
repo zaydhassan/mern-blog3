@@ -36,7 +36,7 @@ const fetchBlogs = async () => {
       const formattedBlogs = data.blogs.map(blog => ({
         ...blog,
         created_at: moment(blog.created_at).format('MMM DD'),
-        userAvatar: blog.user.profile_image 
+        userAvatar: blog.user?.profile_image || "/default-avatar.png" // Fallback image
       }));
       setBlogs(formattedBlogs);
       setFilteredBlogs(formattedBlogs);

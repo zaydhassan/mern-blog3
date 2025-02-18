@@ -40,7 +40,7 @@ exports.getRecommendedBlogs = async (req, res) => {
 
 exports.getAllBlogsController = async (req, res) => {
     try {
-      const blogs = await blogModel.find({}).populate("user");
+      const blogs = await blogModel.find({}).populate("user", "username profile_image");
       if (!blogs) {
         return res.status(200).send({
           success: false,
