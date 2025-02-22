@@ -9,6 +9,7 @@ dotenv.config();
 
 const userRoutes = require("./routes/userRoutes");
 const blogRoutes = require('./routes/blogRoutes');
+const { attachUser } = require("./middleware/authMiddleware");
 const commentRoutes = require('./routes/commentRoutes'); 
 const likeRoutes = require('./routes/likeRoutes');       
 const path = require('path')
@@ -70,6 +71,7 @@ app.use("/api/v1/comments", commentRoutes);
 app.use("/api/v1/likes", likeRoutes); 
 app.use("/uploads", express.static("uploads"));
 app.use("/api/v1/comments", commentRoutes); 
+app.use(attachUser);
 
 app.use(express.static(path.join(__dirname, "../client/build")));
 

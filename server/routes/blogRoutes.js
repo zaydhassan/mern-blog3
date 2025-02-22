@@ -1,5 +1,5 @@
 const express = require("express");
-const { isWriter, isReader } = require("../middleware/authMiddleware");
+const { isWriter, isReader, attachUser } = require("../middleware/authMiddleware");
 const {
   getAllBlogsController,
   createBlogController,
@@ -17,15 +17,15 @@ const blogController = require("../controllers/blogController");
 
 router.get("/all-blog", getAllBlogsController);
 
-router.post("/create-blog", isWriter, createBlogController);
+router.post("/create-blog",attachUser, isWriter, createBlogController);
 
-router.put("/update-blog/:id", isWriter, updateBlogController);
+router.put("/update-blog/:id",attachUser, isWriter, updateBlogController);
 
 router.get("/get-blog/:id",isReader, getBlogByIdController);
 
 router.get("/user-drafts/:userId", blogController.getUserDrafts);
 
-router.delete("/delete-blog/:id", isWriter,deleteBlogController);
+router.delete("/delete-blog/:id",attachUser, isWriter,deleteBlogController);
 
 router.get('/user-blog/:id',userBlogController);
 

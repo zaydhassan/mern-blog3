@@ -97,7 +97,7 @@ exports.getReportedComments = async (req, res) => {
   try {
     const reportedComments = await Comment.find({ reportedBy: { $exists: true, $ne: [] } })
       .populate("user_id", "username")
-      .populate("reportedBy", "username"); // ✅ Fetch users who reported it
+      .populate("reportedBy", "username"); 
 
     return res.status(200).json({ success: true, reportedComments });
   } catch (error) {

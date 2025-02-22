@@ -338,7 +338,8 @@ const handleReport = async (commentId, commentUserId) => {
       />
 
 <Box display="flex" alignItems="center" gap={2} marginBottom={2}>
-<Avatar src={blog?.user?.profile_image || "/default-avatar.png"} />
+<Avatar src={blog?.user?.profile_image ?? "/default-avatar.png"} />
+
         <Box>
           <Typography variant="subtitle1" fontWeight="bold">
             {blog?.user?.username || "Unknown Author"}
@@ -393,17 +394,18 @@ const handleReport = async (commentId, commentUserId) => {
             0{index + 1}
           </Typography>
           <Avatar
-            src={rec.user.profile_image}
-            sx={{ width: 40, height: 40, marginRight: 2 }}
-            alt={rec.user.username}
-          />
+  src={rec.user?.profile_image ?? "/default-avatar.png"}
+  sx={{ width: 40, height: 40, marginRight: 2 }}
+  alt={rec.user?.username ?? "Unknown"}
+/>
           <Box flexGrow={1}>
             <Typography variant="subtitle1" fontWeight="bold">
               {rec.title}
             </Typography>
             <Typography variant="caption" display="block">
-              {rec.user.username}
-            </Typography>
+  {rec.user?.username ?? "Unknown"}
+</Typography>
+
             <Typography variant="caption" color="gray">
               {moment(rec.created_at).format("MMM DD")}
             </Typography>

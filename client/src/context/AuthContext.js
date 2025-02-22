@@ -5,13 +5,13 @@ import { auth } from '../firebase/firebaseConfig';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const login = () => setIsLoggedIn(true);
+const login = () => setIsLoggedIn(true);
 
-  const logout = async () => {
-    try {
-      await signOut(auth);
+const logout = async () => {
+try {
+ await signOut(auth);
 setIsLoggedIn(false);
 console.log('User logged out successfully');
 } catch (error) {

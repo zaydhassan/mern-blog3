@@ -39,29 +39,33 @@ exports.getRecommendedBlogs = async (req, res) => {
 };
 
 exports.getAllBlogsController = async (req, res) => {
-    try {
-      const blogs = await blogModel.find({}).populate("user", "username profile_image");
-      if (!blogs) {
-        return res.status(200).send({
-          success: false,
-          message: 'No Blogs Found'
-        })
-      }
-      return res.status(200).send({
-        success: true,
-        BlogCount: blogs.length,
-        message: "All Blogs lists",
-        blogs,
+  try {
+    const blogs = await blogModel
+      .find({ status: "Published" })
+      .populate({
+        path: "user",
+        select: "username profile_image"
       });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).send({
-        success: false,
-        message: "Error WHile Getting Blogs",
-        error,
-      });
+
+    if (!blogs.length) {
+      return res.status(200).json({ success: false, message: "No Blogs Found", blogs: [] });
     }
-  };
+
+    return res.status(200).json({
+      success: true,
+      BlogCount: blogs.length,
+      message: "All Blogs lists",
+      blogs,
+    });
+  } catch (error) {
+    console.error("Error Fetching Blogs:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Error While Getting Blogs",
+      error: error.toString(),
+    });
+  }
+};
 
   exports.getBlogsByCategory = async (req, res) => {
     const category = req.params.category;
@@ -80,6 +84,7 @@ exports.getAllBlogsController = async (req, res) => {
 
 exports.createBlogController = async(req,res) => {
     try {
+      console.log("Received blog data:", req.body);
       const { title, description, image,category,tags = [], status = 'Draft', user } = req.body; 
         if(!title || !description || !image || !category  || !user) {
             return res.status(400).send({
@@ -108,7 +113,7 @@ exports.createBlogController = async(req,res) => {
       })
     );
 
-        const newBlog = new blogModel({title, description,image,category, tags: tagIds, user,status: status || 'Draft', views: 0});
+        const newBlog = new blogModel({title, description,image,category, tags: tagIds,  user: req.user._id,status: status || 'Draft', views: 0});
         const session = await mongoose.startSession();
     session.startTransaction();
     await newBlog.save({ session });

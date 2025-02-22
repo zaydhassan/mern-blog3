@@ -28,15 +28,15 @@ const blogSchema = new mongoose.Schema(
       required: [true, "Category is required"],
     },
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], 
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "users" }], 
     comments: [{ 
-      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, 
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "users" }, 
       text: String
     }],
     user:{
       type: mongoose.Types.ObjectId,
-      ref:'User',
-      require:[true,"user id is required"],
+      ref:'users',
+      required:[true,"user id is required"],
     },
   },
   { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } } 

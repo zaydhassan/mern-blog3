@@ -169,7 +169,8 @@ useEffect(() => {
                 title={blog.title}
                 description={blog.description}
                 image={blog.image}
-                username={blog.user.username}
+                username={blog.user && blog.user.username ? blog.user.username : "Unknown"}
+
                 time={moment(blog.created_at).format('MMM DD, YYYY')}
                 userAvatar={blog.userAvatar}
                 tags={blog.tags ? blog.tags.map(tag => tag.tag_name).join(", ") : "No tags available"} 
@@ -223,14 +224,14 @@ useEffect(() => {
                   0{index + 1}
                 </Typography>
               </Box>
-              <Avatar src={blog.userAvatar} sx={{ width: 40, height: 40, marginRight: '10px' }} alt={blog.user.username} />
+              <Avatar src={blog.userAvatar} sx={{ width: 40, height: 40, marginRight: '10px' }} alt={blog.user?.username || "User"} />
               <Box flexGrow={1}>
                 <Typography variant="subtitle1" fontWeight="bold">
                   {blog.title}
                 </Typography>
                 <Typography variant="caption" display="block">
-                  {blog.user.username}
-                </Typography>
+  {blog.user?.username || "Unknown"}
+</Typography>
                 <Typography variant="caption" color="gray">
                   {moment(blog.created_at).format('MMM DD')}
                 </Typography>

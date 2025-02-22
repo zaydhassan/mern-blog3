@@ -130,7 +130,13 @@ const CreateBlog = () => {
     }
 
     try {
-      const response = await axios.post("/api/v1/blog/create-blog", payload);
+      const response = await axios.post("/api/v1/blog/create-blog", payload, {
+        headers: {
+          "Content-Type": "application/json",
+          "user-id": localStorage.getItem("userId"), // Ensure user ID is sent
+        },
+      });
+      
       if (response.data.success) {
         toast.success(`Blog ${status === 'Published' ? 'published' : 'saved as draft'}`, { icon: '👏' });
         navigate("/my-blogs");
