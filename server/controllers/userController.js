@@ -1,7 +1,9 @@
+const mongoose = require("mongoose"); 
 const userModel = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const multer = require("multer");
 const path = require("path");
+const Reward = require("../models/rewardModel");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -174,6 +176,60 @@ exports.loginController = async (req, res) => {
       message: "Error In Login Callcback",
       error,
     });
+  }
+};
+
+exports.listRewards = async (req, res) => {
+    console.log("Fetching rewards..."); 
+
+    try {
+        const rewards = await Reward.find({});
+        console.log("Rewards found:", rewards);
+        res.json({ success: true, rewards });
+    } catch (error) {
+        console.error("Error fetching rewards:", error);
+        res.status(500).json({ success: false, message: "Failed to list rewards", error });
+    }
+};
+
+exports.redeemPoints = async (req, res) => {
+  const { userId, rewardId } = req.body;
+
+  try {
+    console.log("Received request to redeem reward:", { userId, rewardId });
+
+    if (!mongoose.Types.ObjectId.isValid(rewardId)) {
+      console.log("Invalid reward ID format:", rewardId);
+      return res.status(400).json({ success: false, message: "Invalid reward ID format" });
+    }
+
+    const formattedRewardId = new mongoose.Types.ObjectId(rewardId); 
+    console.log("Formatted reward ID:", formattedRewardId);
+
+    const reward = await Reward.findById(formattedRewardId);
+    console.log("Reward lookup result:", reward);
+
+    if (!reward) {
+      return res.status(404).json({ success: false, message: "Reward not found" });
+    }
+
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (user.points < reward.costInPoints) {
+      return res.status(400).json({ success: false, message: "Not enough points" });
+    }
+
+    user.points -= reward.costInPoints;
+    user.redeemedRewards.push({ rewardId: reward._id });
+
+    await user.save();
+    res.status(200).json({ success: true, message: "Reward redeemed successfully", pointsLeft: user.points });
+  } catch (error) {
+    console.error("Error redeeming points:", error);
+    res.status(500).json({ success: false, message: "Error redeeming points", error: error.message });
   }
 };
 

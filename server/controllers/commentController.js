@@ -15,9 +15,17 @@ exports.createComment = async (req, res) => {
       created_at: new Date(),
       updated_at: new Date()
     }).save();
-
+    
+    const populatedComment = await comment.populate("user_id", "_id username profile_image");
+    
     const commentCount = await Comment.countDocuments({ blog_id });
-    res.status(201).send({ success: true, comment,commentCount });
+    
+    res.status(201).send({
+      success: true,
+      comment: populatedComment,  // Send the comment with user details
+      commentCount
+    });
+    
   } catch (error) {
     res.status(500).send({ success: false, message: "Failed to create comment", error });
   }
@@ -35,6 +43,33 @@ exports.updateComment = async (req, res) => {
     res.status(200).send(updatedComment);
   } catch (error) {
     res.status(500).send({ message: 'Failed to update comment', error });
+  }
+};
+
+exports.addReply = async (req, res) => {
+  const { parentId, content, user_id } = req.body;
+
+  if (!parentId || !content || !user_id) {
+    return res.status(400).json({ success: false, message: "Missing required fields" });
+  }
+
+  try {
+    const comment = await Comment.findById(parentId);
+    if (!comment) {
+      return res.status(404).json({ success: false, message: "Comment not found" });
+    }
+    const reply = {
+      user_id,
+      content,
+      created_at: new Date(),
+    };
+
+    comment.replies.push(reply);
+    await comment.save();
+
+    res.status(201).json({ success: true, reply });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Failed to add reply", error });
   }
 };
 
@@ -56,8 +91,8 @@ exports.getCommentsByBlog = async (req, res) => {
   const { blogId } = req.params;
   try {
     const comments = await Comment.find({ blog_id: blogId })
-      .populate("user_id", "_id username avatar"); 
-
+    .populate("user_id", "_id username profile_image");
+ 
     if (!comments) {
       return res.status(404).send({ success: false, message: "No comments found" });
     }

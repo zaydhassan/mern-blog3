@@ -43,28 +43,46 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { data } = await axios.post("/api/v1/user/login", {
-        email: inputs.email,
-        password: inputs.password,
-      });
+        const { data } = await axios.post("/api/v1/user/login", {
+            email: inputs.email,
+            password: inputs.password,
+        });
 
-      if (data.success) {
-        localStorage.setItem("userId", data.user._id);
-        localStorage.setItem("userRole", data.user.role);
-        dispatch(authActions.login(data.user));
+        if (data.success) {
+            localStorage.setItem("userId", data.user._id);
+            localStorage.setItem("user", JSON.stringify(data.user));
+            localStorage.setItem("userRole", data.user.role);
 
-        setBannerMessage(`Welcome back, ${data.user.username || "User"} `);
-        setShowWavingHand(true); 
-        setShowBanner(true);
-        setTimeout(() => navigate("/"), 3000); 
-      }
+            dispatch(authActions.login(data.user));
+
+            setBannerMessage(`Welcome back, ${data.user.username || "User"}!`);
+            setShowWavingHand(true);
+            setShowBanner(true);
+
+            setTimeout(() => setShowBanner(false), 5000);
+
+            if (data.user.role === "Admin") {
+                setTimeout(() => navigate("/admin"), 3000);
+            } else {
+                setTimeout(() => navigate("/"), 3000);
+            }
+        } else {
+            console.log("❌ Login failed:", data.message);
+            setBannerMessage("Login failed! Please try again.");
+            setShowWavingHand(false);
+            setShowBanner(true);
+
+            setTimeout(() => setShowBanner(false), 5000);
+        }
     } catch (error) {
-      setBannerMessage("Login failed! Please try again.");
-      setShowWavingHand(false); 
-      setShowBanner(true);
-    }
-  };
+        console.error("❌ Login failed!", error);
+        setBannerMessage("Login failed! Please try again.");
+        setShowWavingHand(false);
+        setShowBanner(true);
 
+        setTimeout(() => setShowBanner(false), 5000);
+    }
+};
   return (
     <Grid
       container

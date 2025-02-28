@@ -50,7 +50,10 @@ exports.getAllBlogsController = async (req, res) => {
     if (!blogs.length) {
       return res.status(200).json({ success: false, message: "No Blogs Found", blogs: [] });
     }
-
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.set("Pragma", "no-cache");
+    res.set("Expires", "0");
+    
     return res.status(200).json({
       success: true,
       BlogCount: blogs.length,

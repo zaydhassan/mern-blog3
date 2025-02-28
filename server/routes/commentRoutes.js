@@ -9,5 +9,6 @@ router.put("/:commentId", commentController.updateComment);
 router.delete("/:commentId", commentController.deleteComment);
 router.post("/report", commentController.reportComment);
 router.get("/reported", commentController.getReportedComments); 
+router.post("/reply", commentController.addReply);
 
 module.exports = router;

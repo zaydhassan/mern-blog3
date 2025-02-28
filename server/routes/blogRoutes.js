@@ -1,5 +1,5 @@
 const express = require("express");
-const { isWriter, isReader, attachUser } = require("../middleware/authMiddleware");
+const { authenticateUser,isWriter, isReader} = require("../middleware/authMiddleware");
 const {
   getAllBlogsController,
   createBlogController,
@@ -17,25 +17,25 @@ const blogController = require("../controllers/blogController");
 
 router.get("/all-blog", getAllBlogsController);
 
-router.post("/create-blog",attachUser, isWriter, createBlogController);
+router.post("/create-blog",authenticateUser,isWriter, createBlogController);
 
-router.put("/update-blog/:id",attachUser, isWriter, updateBlogController);
+router.put("/update-blog/:id",authenticateUser,isWriter, updateBlogController);
 
-router.get("/get-blog/:id",isReader, getBlogByIdController);
+router.get("/get-blog/:id",authenticateUser,isReader, getBlogByIdController);
 
-router.get("/user-drafts/:userId", blogController.getUserDrafts);
+router.get("/user-drafts/:userId",authenticateUser, blogController.getUserDrafts);
 
-router.delete("/delete-blog/:id",attachUser, isWriter,deleteBlogController);
+router.delete("/delete-blog/:id",authenticateUser,isWriter,deleteBlogController);
 
-router.get('/user-blog/:id',userBlogController);
+router.get('/user-blog/:id',authenticateUser, userBlogController);
 
 router.get("/trending", getTrendingBlogs);
 
-router.get("/recommendations/:userId", getRecommendedBlogs);
+router.get("/recommendations/:userId", authenticateUser,getRecommendedBlogs);
 
 router.get('/category/:category', blogController.getBlogsByCategory);
 
-router.get("/tag/:tagId", async (req, res) => {
+router.get("/tag/:tagId",  authenticateUser, async (req, res) => {
   try {
     const { tagId } = req.params;
     const blogs = await require("../models/blogModel").find({ tags: tagId }).populate("tags user");

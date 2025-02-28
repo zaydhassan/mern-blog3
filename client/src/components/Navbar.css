@@ -1,7 +1,7 @@
 .navbar.light {
-  background-color: #fff; 
-  color: #2b2e4a; 
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); 
+  background-color: #ffffff; 
+  color: #2b2e4a;
+  border-bottom: 2px solid #e0e0e0;
 }
 
 .navbar.light .MuiTypography-root {

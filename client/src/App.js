@@ -3,7 +3,7 @@ import { CssBaseline, ThemeProvider as MuiThemeProvider, createTheme } from '@mu
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext'; 
 import Navbar from "./components/Navbar";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route,Navigate,useLocation } from "react-router-dom";
 import Blogs from "./pages/Blogs";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -17,6 +17,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import Contact from "./pages/Contact"; 
 import About from './pages/About';
 import Profile from './pages/Profile';
+import AdminPanel from "./admin/AdminPanel";
+import Rewards from "./pages/Rewards";
 
 function AppWrapper() {
   const { theme } = useTheme();
@@ -30,25 +32,42 @@ function AppWrapper() {
     document.body.style.backgroundColor = themeInstance.palette.background.default;
   }, [themeInstance]);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const location = useLocation();
+  const isAdmin = user?.role === "Admin";
+  const isAdminRoute = location.pathname.startsWith("/admin");
+
   return (
     <MuiThemeProvider theme={themeInstance}>
       <CssBaseline />
-      <Navbar />
+      {!isAdminRoute && <Navbar />}
       <Toaster />
       <Routes>
-      <Route path="/" element={<Home />} /> 
-        <Route path="/blogs" element={<Blogs />} />
-        <Route path="/my-blogs" element={<UserBlogs />} />
-        <Route path="/blog-details/:id" element={<BlogDetails />} />
-        <Route path="/create-blog" element={<CreateBlog />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/Profile" element={<Profile />} />
-        <Route path="/category/:category" element={<Blogs />} />
+      {!isAdmin && (
+          <>
+            <Route path="/" element={<Home />} />
+            <Route path="/blogs" element={<Blogs />} />
+            <Route path="/my-blogs" element={<UserBlogs />} />
+            <Route path="/blog-details/:id" element={<BlogDetails />} />
+            <Route path="/create-blog" element={<CreateBlog />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/category/:category" element={<Blogs />} />
+            <Route path="/rewards" element={<Rewards />} />
+          </>
+        )}
         
+        {isAdmin ? (
+          <Route path="/admin/*" element={<AdminPanel />} />
+        ) : (
+          <Route path="/admin/*" element={<Navigate to="/" />} />
+        )}
+
+        <Route path="*" element={<Navigate to={isAdmin ? "/admin" : "/"} />} />
       </Routes>
     </MuiThemeProvider>
   );

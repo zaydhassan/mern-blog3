@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import moment from "moment";
+import { useTheme } from '@mui/material/styles';
 
 const BlogDetails = () => {
   const [blog, setBlog] = useState(null);
@@ -34,45 +35,58 @@ const BlogDetails = () => {
   const [replyText, setReplyText] = useState({});
   const [reportedComments, setReportedComments] = useState([]);
   const [commentCount, setCommentCount] = useState(0);
+  const theme = useTheme();
 
   useEffect(() => {
 
-  const fetchBlogDetails = async () => {
-    try {
-      const response = await axios.get(`/api/v1/blog/get-blog/${id}`);
-      const likeResponse = await axios.get(`/api/v1/likes/${id}`);
-      const commentResponse = await axios.get(`/api/v1/comments/${id}`);
-
-      if (response.data.success) {
-        setBlog(response.data.blog);
-      } else {
+    const fetchBlogDetails = async () => {
+      try {
+        const response = await axios.get(`/api/v1/blog/get-blog/${id}`, { 
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+          },
+        });
+    
+        const likeResponse = await axios.get(`/api/v1/likes/${id}`);
+        const commentResponse = await axios.get(`/api/v1/comments/${id}`,{
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Pragma": "no-cache",
+          "Expires": "0",
+        },
+      });
+        if (response.data.success) {
+          setBlog(response.data.blog);
+        } else {
+          toast.error("Failed to fetch blog details.");
+        }
+    
+        if (likeResponse.data.success) {
+          const likes = likeResponse.data.likes;
+          setLikeCount(likes.length);
+    
+          let currentUser = user || JSON.parse(localStorage.getItem("user") || "{}");
+          const userLiked = likes.some((like) => like.user_id === currentUser._id);
+          setLiked(userLiked);
+        } else {
+          setLikeCount(0);
+          setLiked(false);
+        }
+    
+        if (commentResponse.data.success) {
+          setComments([...commentResponse.data.comments]); 
+          setCommentCount(commentResponse.data.commentCount);
+        } else {
+          setComments([]);
+          setCommentCount(0);
+        }
+      } catch (error) {
+        console.error("Error fetching blog details:", error);
         toast.error("Failed to fetch blog details.");
       }
-
-      if (likeResponse.data.success) {
-        const likes = likeResponse.data.likes;
-        setLikeCount(likes.length);
-
-        let currentUser = user || JSON.parse(localStorage.getItem("user") || "{}");
-        const userLiked = likes.some((like) => like.user_id === currentUser._id);
-
-        setLiked(userLiked); 
-      } else {
-        setLikeCount(0);
-        setLiked(false);
-      }
-      if (commentResponse.data.success) {
-        setComments(commentResponse.data.comments);
-        setCommentCount(commentResponse.data.commentCount);
-      } else {
-        setComments([]);
-        setCommentCount(0);
-      }
-    } catch (error) {
-      console.error("Error fetching blog details:", error);
-      toast.error("Failed to fetch blog details.");
-    } 
-  };
+    };
 
     const fetchRecommendations = async () => {
       try {
@@ -215,69 +229,60 @@ const BlogDetails = () => {
   
   const handleDelete = async (commentId) => {
     try {
-      const response = await axios.delete(`/api/v1/comments/${commentId}`);
-  
-      if (response.status === 204) {
-        setComments(comments.filter(comment => comment._id !== commentId));
-        toast.success("Comment deleted successfully!");
-        setCommentCount((prevCount) => prevCount - 1);
-      }
+      await axios.delete(`/api/v1/comments/${commentId}`);
+      setComments(comments.filter(comment => comment._id !== commentId));
+      toast.success("Comment deleted successfully!");
     } catch (error) {
-      console.error("Failed to delete comment:", error);
       toast.error("Failed to delete comment.");
     }
   };
   
-const handleReport = async (commentId, commentUserId) => {
-  if (!commentId) {
-    toast.error("Cannot report a comment without an ID.");
-    return;
-  }
+  const handleReport = async (commentId, commentUserId) => {
+    if (!commentId || user?._id === commentUserId) {
+      toast.error("You cannot report your own comment.");
+      return;
+    }
 
-  let currentUser = user || JSON.parse(localStorage.getItem("user") || "{}");
-
-  if (!currentUser || !currentUser._id) {
-    toast.error("User not logged in.");
-    return;
-  }
-
-  if (currentUser._id === commentUserId) {
-    toast.error("You cannot report your own comment.");
-    return;
-  }
-
-  try {
-    const response = await axios.post(`/api/v1/comments/report`, {
-      commentId: commentId, 
-      userId: currentUser._id, 
-    });
-
-    if (response.data.success) {
+    try {
+      await axios.post(`/api/v1/comments/report`, { commentId, userId: user._id });
       setReportedComments([...reportedComments, commentId]);
       toast.success("Comment reported successfully!");
-    } else {
-      toast.error(response.data.message);
-    }
-  } catch (error) {
-    console.error("Error reporting comment:", error);
-    toast.error(error.response?.data?.message || "Error reporting comment");
-  }
-};
-
-  const handleReply = async (commentId, replyContent) => {
-    if (!replyContent) return toast.error("Reply cannot be empty.");
-    try {
-      const { data } = await axios.post(`/api/v1/comments/reply`, { parentId: commentId, content: replyContent });
-      setComments((prev) =>
-        prev.map((c) => (c.id === commentId ? { ...c, replies: [...c.replies, data] } : c))
-      );
-      toast.success("Reply added successfully!");
-      setReplyText((prev) => ({ ...prev, [commentId]: "" }));
     } catch (error) {
-      toast.error("Failed to add reply.");
+      toast.error("Error reporting comment.");
     }
   };
 
+  const handleReply = async (commentId, replyContent) => {
+    if (!replyContent.trim()) return toast.error("Reply cannot be empty.");
+  
+    try {
+      let currentUser = user || JSON.parse(localStorage.getItem("user") || "{}");
+  
+      if (!currentUser || !currentUser._id) {
+        toast.error("User not logged in.");
+        return;
+      }
+  
+      const { data } = await axios.post(`/api/v1/comments/reply`, {
+        parentId: commentId,
+        content: replyContent.trim(),
+        user_id: currentUser._id,
+      });
+  
+      setComments((prev) =>
+        prev.map((c) =>
+          c._id === commentId ? { ...c, replies: [...c.replies, data.reply] } : c
+        )
+      );
+  
+      toast.success("Reply added successfully!");
+      setReplyText((prev) => ({ ...prev, [commentId]: "" }));
+    } catch (error) {
+      console.error("Error adding reply:", error);
+      toast.error("Failed to add reply.");
+    }
+  };
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);  
@@ -286,6 +291,7 @@ const handleReport = async (commentId, commentUserId) => {
   }, []);
   
   if (loading) {
+
     return (
       <Box
         display="flex"
@@ -426,17 +432,35 @@ const handleReport = async (commentId, commentUserId) => {
           display="flex"
           flexDirection="column"
           sx={{
-            background: "rgba(255, 255, 255, 0.1)",
-            backdropFilter: "blur(10px)",
-            borderRadius: "10px",
-            boxShadow: "0px 4px 30px rgba(0, 0, 0, 0.5)",
-            color: "white",
+            background: theme.palette.mode === 'dark' 
+            ? "rgba(255, 255, 255, 0.1)" 
+            : "rgba(0, 0, 0, 0.05)", 
+          backdropFilter: "blur(10px)",
+          borderRadius: "12px",
+          boxShadow: theme.palette.mode === 'dark' 
+            ? "0px 4px 30px rgba(0, 0, 0, 0.5)" 
+            : "0px 4px 15px rgba(0, 0, 0, 0.1)",
+          color: theme.palette.mode === 'dark' ? "white" : "black",
+          padding: "16px"
+        }}
+      >
+        <Typography 
+          variant="h5" 
+          sx={{ 
+            marginBottom: 2, 
+            color: theme.palette.mode === 'dark' ? "white" : "#333" 
           }}
         >
-          <Typography variant="h5" sx={{ marginBottom: 2 }}>
           Comments
         </Typography>
-        <Divider sx={{ backgroundColor: "rgba(255, 255, 255, 0.3)", marginY: 2 }} />
+        <Divider 
+          sx={{ 
+            backgroundColor: theme.palette.mode === 'dark' 
+              ? "rgba(255, 255, 255, 0.3)" 
+              : "rgba(0, 0, 0, 0.2)", 
+            marginY: 2 
+          }} 
+        />
 
         <Box
           sx={{
@@ -461,46 +485,44 @@ const handleReport = async (commentId, commentUserId) => {
               >
                   <Box display="flex" alignItems="center" justifyContent="space-between" gap={2}>
                   <Box display="flex" alignItems="center" gap={2}>
-                    <Avatar src={comment?.user?.avatar || "/default-avatar.png"}>
-                      {comment?.user?.avatar ? "" : comment?.user?.username?.charAt(0) || "U"}
-                    </Avatar>
+                  <Avatar src={comment?.user_id?.profile_image || "/default-avatar.png"}>
+  {comment?.user_id?.profile_image ? "" : comment?.user_id?.username?.charAt(0) || "U"}
+</Avatar>
                     <Box>
-                      <Typography variant="subtitle2" fontWeight="bold">
-                        {comment?.user?.username || "Unknown User"}
-                      </Typography>
-                      <Typography variant="caption" color="gray">
-                        {comment?.date || moment().format("MMM DD, YYYY")}
-                      </Typography>
+                    <Typography variant="subtitle2" fontWeight="bold"
+  sx={{ color: theme.palette.mode === 'dark' ? "#fff" : "#333" }}
+>
+{comment?.user_id?.username || "Unknown User"}
+</Typography>
+<Typography 
+  variant="caption" 
+  sx={{ color: theme.palette.mode === 'dark' ? "#bbb" : "#555" }}
+>
+  {comment?.date || moment().format("MMM DD, YYYY")}
+</Typography>
                       </Box>
                     </Box>
 
                     <Box>
-  
   {user && comment.user_id && String(user._id) === String(comment.user_id._id) ? (
     <>
       <IconButton onClick={() => handleEdit(comment._id)}>
-        <Edit fontSize="small" sx={{ color: "white" }} />
+        <Edit fontSize="small" sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#555" }} />
       </IconButton>
       <IconButton onClick={() => handleDelete(comment._id)}>
-        <Delete fontSize="small" sx={{ color: "white" }} />
+        <Delete fontSize="small" sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#555" }} />
       </IconButton>
     </>
-  ) : (
-    <>
-     
-      <IconButton
-        onClick={() => handleReport(comment._id, comment.user_id._id)}
-        disabled={reportedComments.includes(comment._id)}
-      >
-        <Report
-          fontSize="small"
-          sx={{ color: reportedComments.includes(comment._id) ? "gray" : "white" }}
-        />
-      </IconButton>
-    </>
-  )}
-</Box>
-                  </Box>
+      ) : (
+<IconButton
+      onClick={() => handleReport(comment._id, comment.user_id._id)}
+      disabled={reportedComments.includes(comment._id)}
+    >
+      <Report fontSize="small" sx={{ color: reportedComments.includes(comment._id) ? "gray" : theme.palette.mode === "dark" ? "#fff" : "#555" }} />
+    </IconButton>
+      )}
+    </Box>
+  </Box>
                   {editingComment?.id === comment._id ? (
   <Box display="flex" alignItems="center" gap={1} marginTop={1}>
     <TextField
@@ -511,9 +533,17 @@ const handleReport = async (commentId, commentUserId) => {
       }
       size="small"
       sx={{
-        input: { color: "white" },
+        input: { 
+          color: theme.palette.mode === 'dark' ? "white" : "#333" 
+        },
         "& .MuiOutlinedInput-root": {
-          background: "rgba(255, 255, 255, 0.1)",
+          background: theme.palette.mode === 'dark' 
+            ? "rgba(255, 255, 255, 0.1)" 
+            : "rgba(0, 0, 0, 0.05)",
+          borderRadius: "8px",
+          "& fieldset": {
+            borderColor: theme.palette.mode === 'dark' ? "white" : "#ccc",
+          },
         },
       }}
     />
@@ -527,53 +557,59 @@ const handleReport = async (commentId, commentUserId) => {
   </Box>
 ) : (
   
-  <Typography variant="body2" sx={{ marginTop: 1 }}>
-    {comment.content || comment.text || "No content available"}
-  </Typography>
+  <Typography 
+  variant="body2"
+  sx={{ color: theme.palette.mode === 'dark' ? "#ddd" : "#333" }}
+>
+  {comment.content || comment.text || "No content available"}
+</Typography>
+
 )}
                   {comment.replies?.map((reply, idx) => (
                     <Box
                       key={idx}
                       sx={{
                         marginLeft: 3,
-                        background: "rgba(255, 255, 255, 0.1)",
+                        background: theme.palette.mode === "dark" 
+                        ? "rgba(255, 255, 255, 0.1)" 
+                        : "rgba(0, 0, 0, 0.05)",
                         padding: 1,
                         borderRadius: "8px",
                       }}
                     >
-                     <Typography variant="subtitle2" fontWeight="bold">
+                     <Typography variant="subtitle2" fontWeight="bold"
+                     sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#333" }}
+                     >
                  {reply?.user?.username || "Anonymous"}
               </Typography>
-            <Typography variant="body2">
+            <Typography variant="body2"
+             sx={{ color: theme.palette.mode === "dark" ? "#ddd" : "#333" }}
+             >
              {reply?.content || "No content available"}
                  </Typography>
                     </Box>
                   ))}
 
-                  <Box display="flex" alignItems="center" gap={1} marginTop={1}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      placeholder="Write a reply..."
-                      value={replyText[comment._id] || ""}
-                      onChange={(e) =>
-                        setReplyText((prev) => ({ ...prev, [comment._id]: e.target.value }))
-                      }
-                      sx={{
-                        input: { color: "white" },
-                        "& .MuiOutlinedInput-root": {
-                          background: "rgba(255, 255, 255, 0.1)",
-                        },
-                      }}
-                    />
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleReply(comment._id, replyText[comment._id])}
-                    >
-                      Reply
-                    </Button>
-                  </Box>
+{user && comment.user_id && String(user._id) !== String(comment.user_id._id) && (
+  <Box display="flex" alignItems="center" gap={1} marginTop={1}>
+    <TextField
+      fullWidth
+      size="small"
+      placeholder="Write a reply..."
+      value={replyText[comment._id] || ""}
+      onChange={(e) =>
+        setReplyText((prev) => ({ ...prev, [comment._id]: e.target.value }))
+      }
+    />
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={() => handleReply(comment._id, replyText[comment._id])}
+    >
+      Reply
+    </Button>
+  </Box>
+)}
                 </Box>
               ))
             ) : (
@@ -582,32 +618,44 @@ const handleReport = async (commentId, commentUserId) => {
           </Box>
 
           <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              marginTop: 2,
-              padding: "10px",
-              borderRadius: "10px",
-              background: "rgba(255, 255, 255, 0.2)",
-            }}
-          >
+  sx={{
+    display: "flex",
+    alignItems: "center",
+    gap: 1.5,
+    marginTop: 3,
+    padding: "12px",
+    borderRadius: "12px",
+    background: theme.palette.mode === 'dark' 
+      ? "rgba(255, 255, 255, 0.1)" 
+      : "rgba(0, 0, 0, 0.05)",
+    boxShadow: theme.palette.mode === 'dark' 
+      ? "0px 2px 10px rgba(0, 0, 0, 0.5)" 
+      : "0px 2px 10px rgba(0, 0, 0, 0.1)",
+  }}
+>
+
             <TextField
-              fullWidth
-              label="Leave a comment"
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              variant="outlined"
-              sx={{
-                input: {
-                  color: "white",
-                },
-                "& .MuiOutlinedInput-root": {
-                  background: "rgba(255, 255, 255, 0.1)",
-                  borderRadius: "10px",
-                },
-              }}
-            />
+  fullWidth
+  label="Leave a comment"
+  value={newComment}
+  onChange={(e) => setNewComment(e.target.value)}
+  variant="outlined"
+  sx={{
+    input: {
+      color: theme.palette.mode === 'dark' ? "white" : "#333",
+    },
+    "& .MuiOutlinedInput-root": {
+      background: theme.palette.mode === 'dark' 
+        ? "rgba(255, 255, 255, 0.1)" 
+        : "rgba(0, 0, 0, 0.05)",
+      borderRadius: "10px",
+      "& fieldset": {
+        borderColor: theme.palette.mode === 'dark' ? "white" : "#ccc",
+      },
+    },
+  }}
+/>
+
             <Button
               variant="contained"
               color="primary"

@@ -9,7 +9,9 @@ const {
   updateUserPoints,
   getLeaderboard,
   updateLikePoints,
-  getUserProfile
+  getUserProfile,
+  redeemPoints,
+  listRewards
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -28,6 +30,8 @@ router.post("/upload-image", upload.single("image"), uploadImage);
 router.post("/update-points", updateUserPoints);
 router.get("/leaderboard", getLeaderboard);
 router.post("/update-like-points", updateLikePoints);
+router.get("/rewards", listRewards);
+router.post("/rewards/redeem", redeemPoints);
 router.get("/:id", getUserProfile);
 
 module.exports = router;

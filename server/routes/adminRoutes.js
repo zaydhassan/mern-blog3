@@ -1,26 +1,19 @@
 const express = require('express');
 const router = express.Router();
-
-const { isAdmin } = require('../middleware/authMiddleware');
-
+const { authenticateUser, isAdmin } = require('../middleware/authMiddleware');
 const {
   getAllUsers,
-  updateUser,
-  deleteUser
-} = require('../controllers/userController');
+  getAllBlogs,
+  deleteUser,
+  deleteBlog,
+} = require('../controllers/adminController');
 
-const {
-  getAllBlogsController,
-  updateBlogController,
-  deleteBlogController
-} = require('../controllers/blogController');
+router.get('/users', authenticateUser, isAdmin, getAllUsers);
 
-router.get('/users', isAdmin, getAllUsers);
-router.put('/users/:id', isAdmin, updateUser);
-router.delete('/users/:id', isAdmin, deleteUser);
+router.get('/blogs', authenticateUser, isAdmin, getAllBlogs);
 
-router.get('/blogs', isAdmin, getAllBlogsController);
-router.put('/blogs/:id', isAdmin, updateBlogController);
-router.delete('/blogs/:id', isAdmin, deleteBlogController);
+router.delete('/users/:id', authenticateUser, isAdmin, deleteUser);
+
+router.delete('/blogs/:id', authenticateUser, isAdmin, deleteBlog);
 
 module.exports = router;

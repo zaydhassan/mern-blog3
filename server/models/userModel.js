@@ -46,7 +46,19 @@ const userSchema = new mongoose.Schema(
     badges: {
       type: [String],
       default: []
-    }
+    },
+    redeemedRewards: [
+      {
+        rewardId: {
+          type: mongoose.Types.ObjectId,
+          ref: "Reward",
+        },
+        redeemedOn: {
+          type: Date,
+          default: Date.now,
+        }
+      }
+    ],
   },
   { timestamps: true,  collection: "users" }  
 );

@@ -96,16 +96,16 @@ const AboutPage = () => {
             transition={{ duration: 0.7 }}
             style={{ marginTop: 40, display: 'flex', justifyContent: 'center', gap: 20 }}
           >
-            <a href="https://polysia.github.io/Main-Website/" target="_blank" className="icon">
+             <a href="https://polysia.github.io/Main-Website/" target="_blank" rel="noopener noreferrer" className="icon">
               <FontAwesomeIcon icon={faGlobe} />
             </a>
-            <a href="https://www.youtube.com/@PolysiaTech" target="_blank" className="icon">
+            <a href="https://www.youtube.com/@PolysiaTech" target="_blank" rel="noopener noreferrer" className="icon">
               <FontAwesomeIcon icon={faYoutube} />
             </a>
-            <a href="https://www.linkedin.com/in/polysia-tech/" target="_blank" className="icon">
+            <a href="https://www.linkedin.com/in/polysia-tech/" target="_blank" rel="noopener noreferrer" className="icon">
               <FontAwesomeIcon icon={faLinkedinIn} />
             </a>
-            <a href="https://www.instagram.com/polysiatech/" target="_blank" className="icon">
+            <a href="https://www.instagram.com/polysiatech/" target="_blank" rel="noopener noreferrer" className="icon">
               <FontAwesomeIcon icon={faInstagram} />
             </a>
           </motion.div>
@@ -113,6 +113,6 @@ const AboutPage = () => {
       </Box>
     </>
   );
-};
+}
 
 export default AboutPage;

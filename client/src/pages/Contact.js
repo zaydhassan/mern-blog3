@@ -3,11 +3,9 @@ import { Box, Button, TextField, Typography, Container, Paper, Divider, List, Li
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
-import { db } from '../firebase/firebaseConfig';
-import { collection, addDoc } from 'firebase/firestore';
-import toast from 'react-hot-toast';
 import { useTheme } from '@mui/material/styles';
-
+import { ToastContainer, toast, Slide, Zoom, Flip, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 export default function Contact() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -15,25 +13,64 @@ export default function Contact() {
     const theme = useTheme();
 
     const handleSubmit = async (event) => {
-        event.preventDefault();
-        try {
-            await addDoc(collection(db, "contacts"), {
-                name: name,
-                email: email,
-                message: message,
-                timestamp: new Date()
-            });
-            toast.success('Message sent successfully!');
-            setName('');
-            setEmail('');
-            setMessage('');
-        } catch (error) {
-            console.error("Error adding document: ", error);
-            alert('Error sending message: ' + error.message);
-        }
-    };
-
+      event.preventDefault();
+      const toastId = toast.loading("⏳ Sending your message...", {
+          position: "top-center",
+          theme: "dark",
+          transition: Slide
+      });
+  
+      try {
+          const response = await fetch('http://localhost:8080/api/v1/contact', {  
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name, email, message }),
+          });
+  
+          const data = await response.json();
+          if (response.ok) {
+              toast.update(toastId, {
+                  render: "Message sent successfully!",
+                  type: "success",
+                  isLoading: false,
+                  autoClose: 3000,
+                  transition: Zoom
+              });
+              setName('');
+              setEmail('');
+              setMessage('');
+          } else {
+              toast.update(toastId, {
+                  render: "❌ " + (data.message || "Error sending message."),
+                  type: "error",
+                  isLoading: false,
+                  autoClose: 3000,
+                  transition: Flip
+              });
+          }
+      } catch (error) {
+          console.error('Error:', error);
+          toast.update(toastId, {
+              render: "Error sending message. Try again.",
+              type: "error",
+              isLoading: false,
+              autoClose: 3000,
+              transition: Bounce
+          });
+      }
+  };
+  
     return (
+      <>
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        transition={Slide}
+      />
         <Container component="main" maxWidth={false} sx={{
             height: '100vh',
             backgroundImage: 'url(/contactus.webp)',
@@ -189,5 +226,6 @@ export default function Contact() {
                 </Box>
             </Paper>
         </Container>
+      </>
     );
 }

@@ -1,22 +1,26 @@
 import React, { useState, useEffect, useRef,useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Box, Button, TextField, Avatar, List, ListItem, ListItemButton, ListItemText,Chip,Typography, LinearProgress,Paper } from '@mui/material';
+import { Box, Button, TextField, Avatar, List, ListItem, ListItemButton, ListItemText,Chip,Typography, LinearProgress,Paper, CircularProgress,Link } from '@mui/material';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useNavigate } from 'react-router-dom';
 import { updateUser, authActions } from '../redux/store';
 import { useTheme } from '../context/ThemeContext';
-import toast from "react-hot-toast";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ArticleIcon from '@mui/icons-material/Article';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import axios from 'axios';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import RedeemIcon from '@mui/icons-material/CardGiftcard';
+import { ToastContainer, toast, Slide, Zoom, Flip } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Profile = () => {
   const user = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const [rewards, setRewards] = useState([]);
+  const [loadingRewards, setLoadingRewards] = useState(false);
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
@@ -48,6 +52,36 @@ const Profile = () => {
     }
   }, [user]);
 
+  const fetchRewards = async () => {
+    setLoadingRewards(true);
+    try {
+      const response = await axios.get('/api/v1/rewards');
+  
+      if (response.data.success && Array.isArray(response.data.rewards)) {
+        setRewards(response.data.rewards);
+      } else {
+        setRewards([]); 
+      }
+    } catch (error) {
+      console.error('Failed to fetch rewards:', error);
+      setRewards([]); 
+    }
+    setLoadingRewards(false);
+  };
+
+  const handleRedeem = async (rewardId) => {
+    try {
+      const response = await axios.post('/api/v1/rewards/redeem', { userId: user._id, rewardId });
+      if (response.data.success) {
+        alert('Reward redeemed successfully!');
+      } else {
+        alert('Failed to redeem reward.');
+      }
+    } catch (error) {
+      console.error('Error redeeming reward:', error);
+    }
+  };
+
    const fetchLeaderboard = useCallback(async () => {
     try {
       const response = await axios.get(`/api/v1/user/leaderboard`);
@@ -69,6 +103,7 @@ const Profile = () => {
       fetchUserStats();
       fetchLeaderboard();
       setIsLoading(false);
+      fetchRewards();
     }
   }, [user, points, fetchUserStats,fetchLeaderboard]);
 
@@ -85,7 +120,10 @@ const Profile = () => {
 
   const handleUpdate = async (selectedImage = null) => {
     if (!user || !user._id) {
-      toast.error('Cannot update: User data not available.');
+        toast.error("⚠️ Cannot update: User data not available.", {
+            position: "top-center",
+            transition: Flip,
+        });
       return;
     }
 
@@ -118,8 +156,12 @@ const Profile = () => {
     }
 
     dispatch(updateUser(updatedData));
-    toast.success('Updated Successfully!');
-  };
+    toast.success("Profile updated successfully!", {
+      position: "top-center",
+      autoClose: 3000,
+      transition: Zoom,
+  });
+};
 
   const handleLogout = () => {
     dispatch(authActions.logout());
@@ -135,6 +177,22 @@ const Profile = () => {
   };
 
   return (
+    <>
+    <ToastContainer
+        position="top-center"
+        autoClose={2000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        transition={Slide}
+        toastStyle={{
+          backgroundColor: "#1E1E1E",  
+          color: "#FFFFFF", 
+          borderRadius: "8px",
+          boxShadow: "0px 0px 10px rgba(0, 255, 255, 0.3)",
+      }}
+    />
     <Box display="flex" height="100vh">
       <Box
   width="240px"
@@ -168,6 +226,13 @@ const Profile = () => {
               <ListItemText primary="Create Blog" sx={{ color: 'inherit' }} />
             </ListItemButton>
           </ListItem>
+
+          <ListItem disablePadding>
+          <ListItemButton component={Link} to="/rewards">
+    <RedeemIcon sx={{ marginRight: 1, color: 'Aquamarine' }} /> 
+    <ListItemText primary="Rewards" sx={{ color: 'inherit' }} />
+  </ListItemButton>
+</ListItem>
           
           <ListItem disablePadding>
             <ListItemButton>
@@ -345,6 +410,28 @@ const Profile = () => {
   )}
 </Box>
 
+{loadingRewards ? (
+  <CircularProgress />
+) : Array.isArray(rewards) && rewards.length > 0 ? ( 
+  <List>
+    {rewards.map(reward => (
+      <ListItem key={reward._id}>
+        <ListItemText primary={reward.name} secondary={`Cost: ${reward.costInPoints} Points`} />
+        <Button 
+          variant="contained" 
+          color="primary" 
+          disabled={user.points < reward.costInPoints} 
+          onClick={() => handleRedeem(reward._id)}
+        >
+          Redeem
+        </Button>
+      </ListItem>
+    ))}
+  </List>
+) : (
+  <Typography></Typography> 
+)}
+
           <TextField
             fullWidth
             margin="normal"
@@ -396,6 +483,7 @@ const Profile = () => {
         </Box>
       </Box>
     </Box>
+    </>
   );
 };
 

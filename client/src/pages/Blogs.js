@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import BlogCard from '../components/BlogCard'; 
 import SearchIcon from '@mui/icons-material/Search';
+import { useTheme } from '@mui/material/styles';
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState([]);
@@ -15,7 +16,7 @@ const Blogs = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
-
+  const theme = useTheme();
   const categories = ['Technology', 'Education', 'Health', 'Entertainment', 'Food', 'Business', 'Social Media', 'Travel', 'News'];
 
   const handleCategoryClick = (category) => {
@@ -23,39 +24,50 @@ const Blogs = () => {
 };
 
 useEffect(() => {
-const fetchBlogs = async () => {
-  setLoading(true);
-  try {
-    const categoryPath = location.pathname;
-    const isCategoryPage = categoryPath.startsWith('/category/');
-    const category = isCategoryPage ? categoryPath.split('/').pop() : '';
-    const endpoint = isCategoryPage ? `/api/v1/blog/category/${category}` : '/api/v1/blog/all-blog';
-    
-    const { data } = await axios.get(endpoint);
-    if (data.success) {
-      const formattedBlogs = data.blogs.map(blog => ({
-        ...blog,
-        created_at: moment(blog.created_at).format('MMM DD'),
-        userAvatar: blog.user?.profile_image || "/default-avatar.png" // Fallback image
-      }));
-      setBlogs(formattedBlogs);
-      setFilteredBlogs(formattedBlogs);
-    } else {
+  const fetchBlogs = async () => {
+    setLoading(true);
+    try {
+      const categoryPath = location.pathname;
+      const isCategoryPage = categoryPath.startsWith('/category/');
+      const category = isCategoryPage ? categoryPath.split('/').pop() : '';
+      const endpoint = isCategoryPage ? `/api/v1/blog/category/${category}` : '/api/v1/blog/all-blog';
+
+const { data } = await axios.get(endpoint, { 
+  headers: {
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0",
+  },
+});
+      if (data.success) {
+        console.log("Fetched Blogs Data:", data.blogs); // ✅ Debug if tags exist in API response
+  
+        const formattedBlogs = data.blogs.map(blog => ({
+          ...blog,
+          created_at: moment(blog.created_at).isValid() ? moment(blog.created_at).format('MMM DD') : "Unknown Date",
+          userAvatar: blog.user?.profile_image || "/default-avatar.png",
+          tags: Array.isArray(blog.tags) ? blog.tags.map(tag => (tag?.tag_name || '')) : []
+
+        }));
+  
+        setBlogs(formattedBlogs);
+        setFilteredBlogs(formattedBlogs);
+      } else {
+        setBlogs([]);
+        setFilteredBlogs([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch blogs:', error);
       setBlogs([]);
       setFilteredBlogs([]);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error('Failed to fetch blogs:', error);
-    setBlogs([]);
-    setFilteredBlogs([]);
-  } finally {
-    setLoading(false);
-  }
-};
-
-fetchBlogs();
-}, [location.pathname]);
-
+  };
+  
+  fetchBlogs();
+  }, [location.pathname]);
+  
 useEffect(() => {
   const filtered = blogs.filter(blog =>
     blog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -75,7 +87,13 @@ useEffect(() => {
 
   return (
     
-    <Box sx={{ backgroundColor: '#121212', color: '#fff', minHeight: '100vh', padding: 4 }}>
+    <Box sx={{ 
+      backgroundColor: theme.palette.mode === 'dark' ? "#121212" : "#ffffff", 
+      color: theme.palette.mode === 'dark' ? "#ffffff" : "#000000",
+      minHeight: '100vh', 
+      padding: 4 
+    }}>
+    
     <style>
       {`
        .neon-effect {
@@ -158,7 +176,7 @@ useEffect(() => {
 
     <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
-          <Typography variant="h4" fontWeight="bold" marginBottom={3} sx={{ color: '#fff' }}>
+          <Typography variant="h4" fontWeight="bold" marginBottom={3}  sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#111" }}>
           {location.pathname.includes('/category/') ? `Blogs in ${location.pathname.split('/').pop()}` : 'Featured This Week'}
           </Typography>
           <Grid container spacing={2}>
@@ -172,17 +190,23 @@ useEffect(() => {
                 username={blog.user && blog.user.username ? blog.user.username : "Unknown"}
 
                 time={moment(blog.created_at).format('MMM DD, YYYY')}
-                userAvatar={blog.userAvatar}
-                tags={blog.tags ? blog.tags.map(tag => tag.tag_name).join(", ") : "No tags available"} 
+                profileImage={blog.userAvatar} 
+                tags={Array.isArray(blog.tags) ? blog.tags.filter(tag => tag && tag.tag_name).map(tag => tag.tag_name) : []}
               />
             </Grid>
           ))}
         </Grid>
         </Grid>
         <Grid item xs={12} md={4}>
-          <Typography variant="h6" style={{ fontWeight: 'bold', marginBottom: '30px', color: '#fff' }}>
-            Browse Categories
-          </Typography>
+        <Typography 
+  variant="h5" 
+  fontWeight="bold" 
+  marginTop={5} 
+  marginBottom={3}
+  sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#111" }}
+>
+  Browse Categories
+</Typography>
           <Grid container spacing={2} justifyContent="center">
   {categories.map((category, index) => {
     const isActive = location.pathname.includes(`/category/${category}`);
@@ -198,8 +222,8 @@ useEffect(() => {
             textTransform: 'none',
             fontWeight: 'bold',
             width: '100%',
-            backgroundColor: isActive ? '#4bff00' : '#B2FFFF',  
-            color: isActive ? '' : '#000',
+            backgroundColor: isActive ? "#4bff00" : theme.palette.mode === 'dark' ? "#B2FFFF" : "#d4eaff",
+            color: isActive ? "#000" : theme.palette.mode === 'dark' ? "#000" : "#333",
             boxShadow: isActive
             ? '0 0 5px #9dff00, 0 0 20px #9dff00, 0 0 20px #9dff00'
             : 'none',  
@@ -214,27 +238,33 @@ useEffect(() => {
   })}
 </Grid>
 
-          <Typography variant="h6" fontWeight="bold" marginTop={4} marginBottom={2} sx={{ color: '#fff' }}>
+          <Typography variant="h5" fontWeight="bold" marginTop={4} marginBottom={2}  sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#111" }}>
             Trending ↝
           </Typography>
           {blogs.slice(0, 5).map((blog, index) => (
             <Box key={blog._id} sx={{ display: 'flex', alignItems: 'center', marginBottom: 2, cursor: 'pointer', color: '#fff' }} onClick={() => navigate(`/blog-details/${blog._id}`)}>
               <Box sx={{ minWidth: '50px', marginRight: '10px' }}>
-                <Typography variant="h4" fontWeight="bold" color="">
+                <Typography variant="h4" fontWeight="bold"   sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#111" }}
+                >
                   0{index + 1}
                 </Typography>
               </Box>
               <Avatar src={blog.userAvatar} sx={{ width: 40, height: 40, marginRight: '10px' }} alt={blog.user?.username || "User"} />
               <Box flexGrow={1}>
-                <Typography variant="subtitle1" fontWeight="bold">
+                <Typography variant="subtitle1" fontWeight="bold" sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#111" }}
+                >
                   {blog.title}
                 </Typography>
-                <Typography variant="caption" display="block">
+                <Typography variant="caption" display="block" sx={{ color: theme.palette.mode === "dark" ? "#bbb" : "#555" }}
+                >
   {blog.user?.username || "Unknown"}
 </Typography>
-                <Typography variant="caption" color="gray">
-                  {moment(blog.created_at).format('MMM DD')}
-                </Typography>
+<Typography 
+  variant="caption" 
+  sx={{ color: theme.palette.mode === 'dark' ? "gray" : "#555" }}
+>
+  {moment(blog.created_at).format('MMM DD')}
+</Typography>
               </Box>
               <CardMedia
                 component="img"

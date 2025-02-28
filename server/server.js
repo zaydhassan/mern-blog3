@@ -4,15 +4,17 @@ const morgan = require("morgan");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const nodemailer = require("nodemailer");
+const adminRoutes = require('./routes/adminRoutes');
+const populateRewards = require("./scripts/populateReward");
 
 dotenv.config();
 
 const userRoutes = require("./routes/userRoutes");
 const blogRoutes = require('./routes/blogRoutes');
-const { attachUser } = require("./middleware/authMiddleware");
 const commentRoutes = require('./routes/commentRoutes'); 
 const likeRoutes = require('./routes/likeRoutes');       
-const path = require('path')
+const path = require('path');
+
 connectDB();
 
 const app = express();
@@ -65,14 +67,41 @@ app.post("/api/v1/newsletter/subscribe", (req, res) => {
   });
 });
 
+app.post("/api/v1/contact", (req, res) => {
+  const { name, email, message } = req.body;
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ success: false, message: "All fields are required." });
+  }
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: process.env.EMAIL_USER, 
+    subject: `New Contact Form Submission from ${name}`,
+    text: `You received a new message from:
+    
+    Name: ${name}
+    Email: ${email}
+    Message: ${message}`,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error("Error sending email:", error);
+      return res.status(500).json({ success: false, message: "Failed to send email." });
+    }
+
+    res.status(200).json({ success: true, message: "Message sent successfully!" });
+  });
+});
+
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/blog", blogRoutes);
 app.use("/api/v1/comments", commentRoutes); 
 app.use("/api/v1/likes", likeRoutes); 
 app.use("/uploads", express.static("uploads"));
 app.use("/api/v1/comments", commentRoutes); 
-app.use(attachUser);
-
+app.use("/api/v1/admin", adminRoutes);
 app.use(express.static(path.join(__dirname, "../client/build")));
 
 app.get("*", (req, res) => {

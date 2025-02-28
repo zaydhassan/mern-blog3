@@ -55,7 +55,15 @@ const Navbar = () => {
   };
 
   return (
-    <AppBar position="static" className={`navbar ${theme}`}>
+    <AppBar
+    position="static"
+    className={`navbar ${theme}`}
+    sx={{
+      backgroundColor: theme === 'dark' ? "#121212" : "#ffffff",
+      color: theme === 'dark' ? "#ffffff" : "#000000",
+      borderBottom: theme === 'dark' ? "none" : "2px solid #e0e0e0"
+    }}
+  >
       <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
       <IconButton
   edge="start"
