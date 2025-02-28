@@ -185,7 +185,7 @@ const BlogDetails = () => {
 
         const commentResponse = await axios.get(`/api/v1/comments/${id}`);
         if (commentResponse.data.success) {
-          setComments(commentResponse.data.comments);
+          setComments((prevComments) => [...commentResponse.data.comments]); 
           setCommentCount(commentResponse.data.commentCount);
         }
       }
@@ -504,7 +504,7 @@ const BlogDetails = () => {
                     </Box>
 
                     <Box>
-  {user && comment.user_id && String(user._id) === String(comment.user_id._id) ? (
+                    {user && comment?.user_id?._id && String(user?._id) === String(comment?.user_id?._id) ? (
     <>
       <IconButton onClick={() => handleEdit(comment._id)}>
         <Edit fontSize="small" sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#555" }} />
