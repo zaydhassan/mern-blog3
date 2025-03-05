@@ -45,8 +45,8 @@ exports.getAllBlogsController = async (req, res) => {
       .populate({
         path: "user",
         select: "username profile_image"
-      });
-
+      })
+      .populate("tags", "tag_name");
     if (!blogs.length) {
       return res.status(200).json({ success: false, message: "No Blogs Found", blogs: [] });
     }
@@ -87,14 +87,20 @@ exports.getAllBlogsController = async (req, res) => {
 
 exports.createBlogController = async(req,res) => {
     try {
-      console.log("Received blog data:", req.body);
-      const { title, description, image,category,tags = [], status = 'Draft', user } = req.body; 
-        if(!title || !description || !image || !category  || !user) {
+      const uploadedImage = req.file ? `/uploads/${req.file.filename}` : req.body.image;
+
+      const { title, description, category, tags = [], status = 'Draft', user } = req.body;
+      
+      if (!title || !description || !category || !user) {
             return res.status(400).send({
                 success: false,
                 message: "Please Provide all fields",
             });
         }
+        if (!uploadedImage) {
+          return res.status(400).json({ success: false, message: "Image file is required" });
+      }
+
         const existingUser= await userModel.findById(user);
      if(!existingUser){
         return res.status(404).send({
@@ -102,21 +108,25 @@ exports.createBlogController = async(req,res) => {
             message:'unable to find user',
         });
      }
-
-     const tagIds = await Promise.all(
-      tags.map(async (tagName) => {
-        let tag = await Tag.findOne({ tag_name: tagName });
-        if (!tag) {
-          tag = new Tag({ tag_name: tagName });
-        } else {
-          tag.updated_at = Date.now();
+     let parsedTags;
+        try {
+            parsedTags = JSON.parse(tags);
+            if (!Array.isArray(parsedTags)) parsedTags = [];
+        } catch (error) {
+            parsedTags = [];
         }
-          await tag.save();
-        return tag._id;
-      })
-    );
 
-        const newBlog = new blogModel({title, description,image,category, tags: tagIds,  user: req.user._id,status: status || 'Draft', views: 0});
+        const tagIds = await Promise.all(
+          parsedTags.map(async (tagName) => {
+              let tag = await Tag.findOne({ tag_name: tagName });
+              if (!tag) {
+                  tag = new Tag({ tag_name: tagName });
+                  await tag.save();
+              }
+              return tag._id;
+          })
+      );
+        const newBlog = new blogModel({title, description,image: uploadedImage,category, tags: tagIds,  user: req.user._id,status: status || 'Draft', views: 0});
         const session = await mongoose.startSession();
     session.startTransaction();
     await newBlog.save({ session });
@@ -149,29 +159,26 @@ exports.createBlogController = async(req,res) => {
 };
 
 exports.updateBlogController = async (req, res) => {
-    try {
+  try {
       const { id } = req.params;
-      const { title, description, image, status } = req.body;
-      const blog = await blogModel.findByIdAndUpdate(
-        id,
-        { title, description, image, status },
-        { ...req.body },
-        { new: true }
+      const { title, description, image, status, category, tags } = req.body;
+
+      const updatedBlog = await blogModel.findByIdAndUpdate(
+          id,
+          { title, description, image, status, category, tags },
+          { new: true }
       );
-      return res.status(200).send({
-        success: true,
-        message: "Blog Updated!",
-        blog,
-      });
-    } catch (error) {
-      console.log(error);
-      return res.status(400).send({
-        success: false,
-        message: "Error WHile Updating Blog",
-        error,
-      });
-    }
-  };
+
+      if (!updatedBlog) {
+          return res.status(404).json({ success: false, message: "Blog not found" });
+      }
+
+      return res.status(200).json({ success: true, message: "Blog Updated!", blog: updatedBlog });
+  } catch (error) {
+      console.error("Error updating blog:", error);
+      return res.status(500).json({ success: false, message: "Error updating blog", error: error.message });
+  }
+};
 
   exports.getUserDrafts = async (req, res) => {
     try {
@@ -218,29 +225,24 @@ exports.updateBlogController = async (req, res) => {
   
   exports.deleteBlogController = async (req, res) => {
     try {
-      const blog = await blogModel.findById(req.params.id);
-      if (!blog) {
-        return res.status(404).send({
-          success: false,
-          message: "Blog not found",
-        });
+      const blogId = req.params.id;
+      
+      if (!mongoose.Types.ObjectId.isValid(blogId)) {
+        return res.status(400).json({ success: false, message: "Invalid blog ID" });
       }
-      await userModel.updateOne(
-        { _id: blog.user },
-        { $pull: { blogs: blog._id } }
-      );
+  
+      // Check if the blog exists
+      const blog = await blogModel.findById(blogId);
+      if (!blog) {
+        return res.status(404).json({ success: false, message: "Blog not found" });
+      }
+  
       await blogModel.deleteOne({ _id: blog._id });
-      return res.status(200).send({
-        success: true,
-        message: "Blog Deleted!",
-      });
+  
+      return res.status(200).json({ success: true, message: "Blog Deleted Successfully!" });
     } catch (error) {
-      console.log(error);
-      return res.status(400).send({
-        success: false,
-        message: "Error while deleting blog",
-        error,
-      });
+      console.error("Error deleting blog:", error);
+      return res.status(500).json({ success: false, message: "Internal Server Error", error });
     }
   };
 

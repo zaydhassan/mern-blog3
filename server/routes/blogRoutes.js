@@ -1,4 +1,5 @@
 const express = require("express");
+const multer = require("multer");
 const { authenticateUser,isWriter, isReader} = require("../middleware/authMiddleware");
 const {
   getAllBlogsController,
@@ -13,11 +14,28 @@ const {
 } = require("../controllers/blogController");
 
 const router = express.Router();
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, "uploads/"); 
+  },
+  filename: (req, file, cb) => {
+      cb(null, Date.now() + "-" + file.originalname); 
+  },
+});
+const upload = multer({
+  storage,
+  limits: {
+      fileSize: 50 * 1024 * 1024, 
+      fieldSize: 1024 * 1024 * 5, 
+  },
+});
+
 const blogController = require("../controllers/blogController");
 
 router.get("/all-blog", getAllBlogsController);
 
-router.post("/create-blog",authenticateUser,isWriter, createBlogController);
+router.post("/create-blog", authenticateUser, isWriter, upload.single("image"), createBlogController);
 
 router.put("/update-blog/:id",authenticateUser,isWriter, updateBlogController);
 

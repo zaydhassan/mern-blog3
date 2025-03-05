@@ -34,22 +34,23 @@ useEffect(() => {
 
 const { data } = await axios.get(endpoint, { 
   headers: {
-    "Cache-Control": "no-cache, no-store, must-revalidate",
-    "Pragma": "no-cache",
-    "Expires": "0",
-  },
+    "Cache-Control": "no-cache"
+  }
 });
       if (data.success) {
-        console.log("Fetched Blogs Data:", data.blogs); // ✅ Debug if tags exist in API response
+        console.log("Fetched Blogs Data:", data.blogs); 
   
         const formattedBlogs = data.blogs.map(blog => ({
           ...blog,
           created_at: moment(blog.created_at).isValid() ? moment(blog.created_at).format('MMM DD') : "Unknown Date",
           userAvatar: blog.user?.profile_image || "/default-avatar.png",
-          tags: Array.isArray(blog.tags) ? blog.tags.map(tag => (tag?.tag_name || '')) : []
-
-        }));
-  
+          tags: Array.isArray(blog.tags)
+          ? blog.tags
+              .map(tag => tag?.tag_name?.trim()) 
+              .filter(tag => tag && tag.length > 0) 
+          : []
+      }));
+      
         setBlogs(formattedBlogs);
         setFilteredBlogs(formattedBlogs);
       } else {
@@ -177,7 +178,7 @@ useEffect(() => {
     <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
           <Typography variant="h4" fontWeight="bold" marginBottom={3}  sx={{ color: theme.palette.mode === "dark" ? "#fff" : "#111" }}>
-          {location.pathname.includes('/category/') ? `Blogs in ${location.pathname.split('/').pop()}` : 'Featured This Week'}
+          {location.pathname.includes('/category/') ? `Blogs in ${location.pathname.split('/').pop()}` : 'Featured Blogs'}
           </Typography>
           <Grid container spacing={2}>
           {filteredBlogs.map((blog, index) => (
@@ -191,7 +192,7 @@ useEffect(() => {
 
                 time={moment(blog.created_at).format('MMM DD, YYYY')}
                 profileImage={blog.userAvatar} 
-                tags={Array.isArray(blog.tags) ? blog.tags.filter(tag => tag && tag.tag_name).map(tag => tag.tag_name) : []}
+                tags={blog.tags}
               />
             </Grid>
           ))}

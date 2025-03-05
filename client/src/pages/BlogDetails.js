@@ -11,6 +11,8 @@ import {
   Button,
   Divider,
   CardMedia,
+  Menu,
+  MenuItem
 } from "@mui/material";
 import { Favorite, FavoriteBorder, Share, Comment, Edit, Delete,Report } from "@mui/icons-material";
 import toast from "react-hot-toast";
@@ -37,6 +39,9 @@ const BlogDetails = () => {
   const [commentCount, setCommentCount] = useState(0);
   const theme = useTheme();
 
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  
   useEffect(() => {
 
     const fetchBlogDetails = async () => {
@@ -152,7 +157,41 @@ const BlogDetails = () => {
       toast.error("Error updating like");
     }
   };  
+  const handleShareClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleShareClose = () => {
+    setAnchorEl(null);
+  };
   
+  const handleShare = (platform) => {
+    if (!blog) return;
+
+    const shareUrl = `${window.location.origin}/blog-details/${id}`;
+    const title = encodeURIComponent(blog.title);
+
+    let url = "";
+    switch (platform) {
+      case "twitter":
+        url = `https://twitter.com/intent/tweet?text=${title}&url=${shareUrl}`;
+        break;
+      case "facebook":
+        url = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+        break;
+      case "linkedin":
+        url = `https://www.linkedin.com/shareArticle?mini=true&url=${shareUrl}&title=${title}`;
+        break;
+      case "whatsapp":
+        url = `https://wa.me/?text=${title} - ${shareUrl}`;
+        break;
+      default:
+        return;
+    }
+    window.open(url, "_blank");
+    handleShareClose();
+  };
+
   const handleComment = async () => {
     if (!newComment.trim()) {
       toast.error("Please write a comment before posting.");
@@ -368,9 +407,15 @@ const BlogDetails = () => {
       <Comment />
     </Badge>
   </IconButton>
-          <IconButton>
+          <IconButton onClick={handleShareClick}>
             <Share />
           </IconButton>
+          <Menu anchorEl={anchorEl} open={open} onClose={handleShareClose}>
+          <MenuItem onClick={() => handleShare("twitter")}>Share on Twitter</MenuItem>
+          <MenuItem onClick={() => handleShare("facebook")}>Share on Facebook</MenuItem>
+          <MenuItem onClick={() => handleShare("linkedin")}>Share on LinkedIn</MenuItem>
+          <MenuItem onClick={() => handleShare("whatsapp")}>Share on WhatsApp</MenuItem>
+        </Menu>
         </Box>
         <Typography variant="h4" fontWeight="bold" marginTop={3}>
         {blog?.title}

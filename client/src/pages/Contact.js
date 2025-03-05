@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Container, Paper, Divider, List, ListItem, ListItemIcon, ListItemText } from '@mui/material';
 import EmailIcon from '@mui/icons-material/Email';
-import PhoneIcon from '@mui/icons-material/Phone';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useTheme } from '@mui/material/styles';
 import { ToastContainer, toast, Slide, Zoom, Flip, Bounce } from "react-toastify";
@@ -104,15 +103,11 @@ export default function Contact() {
                     <List>
                         <ListItem>
                             <ListItemIcon><LocationOnIcon sx={{ color: '#FFFFFF' }} /></ListItemIcon>
-                            <ListItemText primary="4671 Sugar Camp Road, Owatonna, Minnesota, 55060" />
-                        </ListItem>
-                        <ListItem>
-                            <ListItemIcon><PhoneIcon sx={{ color: '#FFFFFF' }} /></ListItemIcon>
-                            <ListItemText primary="571-457-2321" />
+                            <ListItemText primary="Sector 78, Noida, UttarPradesh, India" />
                         </ListItem>
                         <ListItem>
                             <ListItemIcon><EmailIcon sx={{ color: '#FFFFFF' }} /></ListItemIcon>
-                            <ListItemText primary="ntamerrwael@mfono.ga" />
+                            <ListItemText primary="info@polysia.com" />
                         </ListItem>
                     </List>
                 </Box>

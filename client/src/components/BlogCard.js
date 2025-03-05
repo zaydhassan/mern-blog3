@@ -9,7 +9,6 @@ const BlogCard = ({ id, title, description, image, username, profileImage, time,
   const navigate = useNavigate();
   const theme = useTheme();
 
-  console.log("Blog Tags for:", title, tags);
   
   const stripHtmlTags = (html) => {
     let doc = new DOMParser().parseFromString(html, "text/html");
@@ -99,17 +98,19 @@ const BlogCard = ({ id, title, description, image, username, profileImage, time,
           {tags && tags.length > 0 ? (
   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "center", mt: 1 }}>
     {tags.map((tag, index) => (
-      <Chip
-        key={index}
-        label={tag} // ✅ Now tag is a string, so this works
-        sx={{
-          backgroundColor: theme.palette.mode === "dark" ? "#7FFFD4" : "#007BFF",
-          color: "#000",
-          fontWeight: "bold",
-          fontSize: "12px",
-          padding: "5px",
-        }}
-      />
+      tag ? (
+        <Chip
+          key={index}
+          label={tag} 
+          sx={{
+            backgroundColor: theme.palette.mode === "dark" ? "#7FFFD4" : "#007BFF",
+            color: "#000",
+            fontWeight: "bold",
+            fontSize: "12px",
+            padding: "5px",
+          }}
+        />
+      ) : null
     ))}
   </Box>
 ) : (

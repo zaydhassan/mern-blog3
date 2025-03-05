@@ -17,6 +17,28 @@ axios.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for (let registration of registrations) {
+      registration.unregister().then(function(boolean) {
+        console.log('Service worker unregistered successfully:', boolean);
+      });
+    }
+  }).catch(function(err) {
+    console.error('Service worker unregister failed:', err);
+  });
+}
+
+if ('caches' in window) {
+  caches.keys().then(cacheNames => {
+    cacheNames.forEach(cacheName => {
+      caches.delete(cacheName).then(function(boolean) {
+        console.log('Cache deleted successfully:', boolean);
+      });
+    });
+  });
+}
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <Provider store={store}>

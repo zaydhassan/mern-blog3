@@ -1,5 +1,6 @@
 const User = require("../models/userModel");
 const Blog = require("../models/blogModel");
+const Comment = require("../models/commentModel");
 
 const getAllUsers = async (req, res) => {
   try {
@@ -43,9 +44,32 @@ const deleteBlog = async (req, res) => {
   }
 };
 
+const getComments = async (req, res) => {
+  try {
+    const comments = await Comment.find().populate("user_id", "username email");  
+    res.status(200).json({ success: true, comments });
+  } catch (error) {
+    console.error("Error fetching comments: ", error);
+    res.status(500).send("Failed to fetch comments");
+  }
+};
+
+const deleteComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Comment.findByIdAndDelete(id);
+    res.status(200).json({ success: true, message: "Comment deleted successfully" });
+  } catch (error) {
+    console.error("❌ Error deleting comment:", error);
+    res.status(500).json({ success: false, message: "Failed to delete comment" });
+  }
+};
+
 module.exports = {
   getAllUsers,
   getAllBlogs,
   deleteUser,
+  getComments,
+  deleteComment,
   deleteBlog,
 };

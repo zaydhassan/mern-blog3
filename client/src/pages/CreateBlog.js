@@ -8,6 +8,7 @@ import Quill from 'quill';
 import MicIcon from '@mui/icons-material/Mic';
 import MicOffIcon from '@mui/icons-material/MicOff';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { useLocation } from "react-router-dom";
 
 const StyledFormBox = styled(Box)(({ theme }) => ({
   width: "55%",
@@ -35,17 +36,36 @@ const CreateBlog = () => {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [useImageUrl, setUseImageUrl] = useState(true);
   const quillRef = useRef(null);
-  const [quill, setQuill] = useState(null);
-
+  const quillInstance = useRef(null);
+  
+  const location = useLocation();
+  const editingBlog = location.state?.blog || null;
+  
+  useEffect(() => {
+      if (editingBlog) {
+          setInputs({
+              title: editingBlog.title || "",
+              description: editingBlog.description || "",
+              image: editingBlog.image || "",
+              category: editingBlog.category || "",
+              tags: editingBlog.tags ? editingBlog.tags.join(", ") : "",
+          });
+  
+          if (quillInstance.current) {
+              quillInstance.current.root.innerHTML = editingBlog.description || "";
+          }
+      }
+  }, [editingBlog]);
+  
   const { transcript, listening, resetTranscript } = useSpeechRecognition();
 
   useEffect(() => {
-    if (quill && transcript) {
-      quill.root.innerHTML += ` ${transcript}`;
-      setInputs((prev) => ({ ...prev, description: quill.root.innerHTML }));
+    if (quillInstance.current && transcript) {
+      quillInstance.current.root.innerHTML += ` ${transcript}`;
+      setInputs((prev) => ({ ...prev, description: quillInstance.current.root.innerHTML }));
       resetTranscript();
     }
-  }, [transcript,quill,resetTranscript]);
+  }, [transcript, resetTranscript]);
 
   useEffect(() => {
     if (userRole !== 'Writer') {
@@ -55,10 +75,8 @@ const CreateBlog = () => {
   }, [navigate, userRole]);
 
   useEffect(() => {
-    const editorContainer = quillRef.current;
-
-    if (editorContainer && !quill) {
-      const newQuill = new Quill(editorContainer, {
+    if (!quillInstance.current && quillRef.current) {
+      quillInstance.current = new Quill(quillRef.current, {
         theme: 'snow',
         placeholder: 'Write something amazing...',
         modules: {
@@ -79,26 +97,16 @@ const CreateBlog = () => {
           ],
         },
       });
-
-      newQuill.on('text-change', () => {
+  
+      quillInstance.current.on('text-change', () => {
         setInputs((prev) => ({
           ...prev,
-          description: newQuill.root.innerHTML,
+          description: quillInstance.current.root.innerHTML,
         }));
       });
-
-      setQuill(newQuill);
     }
-
-    return () => {
-      if (quill) {
-        quill.off('text-change');
-        if (editorContainer) editorContainer.innerHTML = "";
-        setQuill(null);
-      }
-    };
-  }, [quill]);
-
+  }, [])
+  
   const handleChange = (e) => {
     setInputs({ ...inputs, [e.target.name]: e.target.value });
   };
@@ -106,34 +114,40 @@ const CreateBlog = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = () => setUploadedImage(reader.result);
-      reader.readAsDataURL(file);
+        setUploadedImage(file); 
     }
-  };
+};
 
-  const handleBlogAction = async (status) => {
-    const tagsArray = inputs.tags.split(',').map(tag => tag.trim());
-    const payload = {
-      title: inputs.title,
-      description: inputs.description,
-      image: useImageUrl ? inputs.image : uploadedImage,
-      category: inputs.category,
-      user: id,
-      tags: tagsArray,
-      status
-    };
-
+const handleBlogAction = async (status) => {
+  const formData = new FormData();
+  formData.append("title", inputs.title);
+  formData.append("description", inputs.description);
+  formData.append("category", inputs.category);
+  formData.append("status", status);
+  formData.append("user", id);
+    
+  const formattedTags = inputs.tags ? inputs.tags.split(",").map(tag => tag.trim()) : [];
+  formData.append("tags", JSON.stringify(formattedTags)); 
+ 
+  if (uploadedImage) {
+    formData.append("image", uploadedImage);
+} else if (inputs.image) {
+    formData.append("image", inputs.image);
+} else {
+    toast.error("Please upload an image or provide an image URL.");
+    return;
+}
     if (!inputs.title || !inputs.description || !inputs.category || (!inputs.image && !uploadedImage)) {
-      toast.error("Please provide all fields");
+      toast.error("Please provide all required fields, including an image.");
       return;
     }
 
     try {
-      const response = await axios.post("/api/v1/blog/create-blog", payload, {
+      
+      const response = await axios.post("/api/v1/blog/create-blog", formData, {
         headers: {
-          "Content-Type": "application/json",
-          "user-id": localStorage.getItem("userId"), // Ensure user ID is sent
+          "Content-Type": "multipart/form-data",
+          "user-id": localStorage.getItem("userId"), 
         },
       });
       
@@ -175,7 +189,7 @@ const CreateBlog = () => {
         <TextField name="title" value={inputs.title} onChange={handleChange} variant="outlined" required size="small" />
 
         <InputLabel>Description</InputLabel>
-        <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '12px' }}>
+        <div style={{ marginBottom: '12px', width: '100%' }}>
           <div
             ref={quillRef}
             style={{

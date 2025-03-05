@@ -1,5 +1,5 @@
 const express = require("express");
-const { toggleLike, getLikesByBlog } = require("../controllers/likeController"); // ✅ Correct Import
+const { toggleLike, getLikesByBlog } = require("../controllers/likeController"); 
 
 const router = express.Router();
 

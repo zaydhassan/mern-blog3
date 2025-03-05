@@ -10,19 +10,21 @@ ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarEle
 const AdminPanel = () => {
   const [users, setUsers] = useState([]);
   const [blogs, setBlogs] = useState([]);
+  const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [usersRes, blogsRes] = await Promise.all([
+        const [usersRes, blogsRes, commentsRes] = await Promise.all([
           axios.get("/api/v1/admin/users"),
           axios.get("/api/v1/admin/blogs"),
+          axios.get("/api/v1/admin/comments")
         ]);
-
+        
         setUsers(usersRes.data.users || []);
         setBlogs(blogsRes.data.blogs || []);
-       
+        setComments(commentsRes.data.comments || []); // Set fetched comments
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -33,7 +35,27 @@ const AdminPanel = () => {
     fetchData();
   }, []);
 
-  // Logout Function
+  const handleDeleteComment = async (id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This comment will be deleted permanently!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Delete",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`/api/v1/admin/comments/${id}`);
+        setComments(comments.filter((comment) => comment._id !== id));
+        Swal.fire("Deleted!", "The comment has been removed.", "success");
+      } catch (error) {
+        Swal.fire("Error", "Failed to delete the comment", "error");
+      }
+    }
+  };
+
   const handleLogout = () => {
     Swal.fire({
       title: "Are you sure?",
@@ -47,7 +69,7 @@ const AdminPanel = () => {
         localStorage.removeItem("userId");
         localStorage.removeItem("user");
         localStorage.removeItem("userRole");
-        window.location.href = "/login"; // Redirect to login
+        window.location.href = "/login"; 
       }
     });
   };
@@ -73,7 +95,6 @@ const AdminPanel = () => {
     }
   };
 
-  // Ban User Function
   const handleBanUser = async (id) => {
     const result = await Swal.fire({
       title: "Ban User?",
@@ -103,8 +124,6 @@ const AdminPanel = () => {
       <aside className="sidebar">
         <h2>Admin Dashboard</h2>
         <ul>
-          <li>Users</li>
-          <li>Blogs</li>
           <li className="logout-btn" onClick={handleLogout}>Logout</li>
         </ul>
       </aside>
@@ -176,6 +195,33 @@ const AdminPanel = () => {
                 </tr>
               ))}
             </tbody>
+          </table>
+        </div>
+
+        <div className="table-section">
+        <h2>Manage Comments</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Comment ID</th>
+                <th>Comment Text</th>
+                <th>User</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+  {comments.map((comment) => (
+    <tr key={comment._id}>
+      <td>{comment._id}</td>
+      <td>{comment.content}</td>
+      <td>{comment.user_id ? comment.user_id.username : 'No User'}</td>
+      <td>
+        <button className="delete-btn" onClick={() => handleDeleteComment(comment._id)}>Delete</button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
           </table>
         </div>
 

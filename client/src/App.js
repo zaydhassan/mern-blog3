@@ -19,6 +19,7 @@ import About from './pages/About';
 import Profile from './pages/Profile';
 import AdminPanel from "./admin/AdminPanel";
 import Rewards from "./pages/Rewards";
+import EditBlog from "./pages/EditBlog";
 
 function AppWrapper() {
   const { theme } = useTheme();
@@ -58,6 +59,7 @@ function AppWrapper() {
             <Route path="/profile" element={<Profile />} />
             <Route path="/category/:category" element={<Blogs />} />
             <Route path="/rewards" element={<Rewards />} />
+            <Route path="/edit-blog/:id" element={<EditBlog />} />
           </>
         )}
         
