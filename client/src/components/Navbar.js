@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { AppBar, Toolbar, IconButton, Button, Avatar, MenuItem, Menu } from "@mui/material";
+import { AppBar, Toolbar, IconButton, Button, Avatar, MenuItem, Menu, Drawer, Box } from "@mui/material";
+import MenuIcon from '@mui/icons-material/Menu';
 import NightsStayIcon from '@mui/icons-material/NightsStay';
 import Brightness5Icon from '@mui/icons-material/Brightness5';
 import toast from "react-hot-toast";
@@ -15,22 +16,22 @@ const Navbar = () => {
   const user = useSelector((state) => state.auth.user);
   const { theme, toggleTheme } = useTheme();
   const dispatch = useDispatch();
-  const location = useLocation(); 
+  const location = useLocation();
   const [anchorEl, setAnchorEl] = useState(null);
-  const isWriter = user?.role?.toLowerCase() === "writer";
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     setAnchorEl(null);
   }, [location]);
 
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  
   const handleMenu = (event) => {
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
   
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
+  const handleClose = () => setAnchorEl(null);
 
   const handleLogout = () => {
     dispatch(authActions.logout());
@@ -46,72 +47,85 @@ const Navbar = () => {
     }
   };
 
-  const handleRestrictedNavigation = (path) => {
-    if (isWriter) {
-      navigate(path);
-    } else {
-      toast.error("Login as a writer to access this feature");
-    }
-  };
-
   return (
     <AppBar
-    position="static"
-    className={`navbar ${theme}`}
-    sx={{
-      backgroundColor: theme === 'dark' ? "#121212" : "#ffffff",
-      color: theme === 'dark' ? "#ffffff" : "#000000",
-      borderBottom: theme === 'dark' ? "none" : "2px solid #e0e0e0"
-    }}
-  >
-      <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
-      <IconButton
-  edge="start"
-  color="inherit"
-  aria-label="logo"
-  onClick={() => navigate('/')}
-  style={{ cursor: 'pointer' }}
->
-  <img src="polysia.jpeg" alt="Logo" style={{ height: '55px' }} />  
-</IconButton>
+      position="static"
+      className={`navbar ${theme}`}
+      sx={{
+        backgroundColor: theme === 'dark' ? "#121212" : "#ffffff",
+        color: theme === 'dark' ? "#ffffff" : "#000000",
+        borderBottom: theme === 'dark' ? "none" : "2px solid #e0e0e0"
+      }}
+    >
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        {/* Mobile Menu Button */}
+        <IconButton 
+          edge="start" 
+          color="inherit" 
+          aria-label="menu"
+          sx={{ display: { md: "none" } }}  
+          onClick={handleDrawerToggle}
+        >
+          <MenuIcon />
+        </IconButton>
+        
+        {/* Logo */}
+        <IconButton 
+          edge="start" 
+          color="inherit" 
+          onClick={() => navigate('/')} 
+          sx={{ display: { xs: "none", md: "block" } }}
+        >
+          <img src="polysia.jpeg" alt="Logo" style={{ height: '50px' }} />  
+        </IconButton>
 
-        <div style={{ flexGrow: 1, justifyContent: 'center', display: 'flex' }}>
-          <Button className={location.pathname === "/" ? "active" : ""} onClick={() => navigate("/")} color="inherit">Home</Button>
-          <Button className={location.pathname === "/about" ? "active" : ""} onClick={() => navigate("/about")} color="inherit">About</Button>
-          <Button className={location.pathname.startsWith("/blogs") ? "active" : ""} onClick={() => handleNavigation("/blogs")} color="inherit">Blogs</Button>
-          <Button className={location.pathname === "/contact" ? "active" : ""} onClick={() => navigate("/contact")} color="inherit">Contact</Button>
-        </div>
+        {/* Desktop Navigation */}
+        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
+          <Button onClick={() => navigate("/")} color="inherit">Home</Button>
+          <Button onClick={() => navigate("/about")} color="inherit">About</Button>
+          <Button onClick={() => handleNavigation("/blogs")} color="inherit">Blogs</Button>
+          <Button onClick={() => navigate("/contact")} color="inherit">Contact</Button>
+        </Box>
 
-        {isLogin && (
-          <>
-            <IconButton onClick={toggleTheme} color="inherit">{theme === 'light' ? <Brightness5Icon /> : <NightsStayIcon />}</IconButton>
-            <Avatar
-              src={user?.profile_image || "/default-avatar.png"}
-              alt="Profile"
-              onClick={handleMenu}
-              style={{ marginRight: '10px', cursor: 'pointer', width: '40px', height: '40px' }}
-            />
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem onClick={() => { handleNavigation('/profile'); handleClose(); }}>Profile</MenuItem>
-              
-              <MenuItem onClick={() => { handleRestrictedNavigation('/my-blogs'); handleClose(); }}>My Blogs</MenuItem>
-              <MenuItem onClick={() => { handleRestrictedNavigation('/create-blog'); handleClose(); }}>Create Blog</MenuItem>
-              
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
-            </Menu>
-          </>
-        )}
-
-        {!isLogin && (
-          <Button onClick={() => navigate("/login")} variant="contained" style={{ background: '#5e81ac', color: '#ffffff' }}>Login</Button>
-        )}
+        {/* Mobile Drawer */}
+        <Drawer anchor="left" open={mobileOpen} onClose={handleDrawerToggle}>
+          <Box sx={{ width: 250, display: "flex", flexDirection: "column", padding: 2 }}>
+            <Button onClick={() => navigate("/")} color="inherit">Home</Button>
+            <Button onClick={() => navigate("/about")} color="inherit">About</Button>
+            <Button onClick={() => handleNavigation("/blogs")} color="inherit">Blogs</Button>
+            <Button onClick={() => navigate("/contact")} color="inherit">Contact</Button>
+          </Box>
+        </Drawer>
+        
+        {/* User Profile & Theme Toggle */}
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {isLogin && (
+            <>
+              <IconButton onClick={toggleTheme} color="inherit">
+                {theme === 'light' ? <Brightness5Icon /> : <NightsStayIcon />}
+              </IconButton>
+              <Avatar
+                src={user?.profile_image || "/default-avatar.png"}
+                alt="Profile"
+                onClick={handleMenu}
+                sx={{ cursor: 'pointer', width: '40px', height: '40px', marginLeft: 1 }}
+              />
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+              >
+                <MenuItem onClick={() => { navigate('/profile'); handleClose(); }}>Profile</MenuItem>
+                <MenuItem onClick={() => { handleNavigation('/my-blogs'); handleClose(); }}>My Blogs</MenuItem>
+                <MenuItem onClick={() => { handleNavigation('/create-blog'); handleClose(); }}>Create Blog</MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              </Menu>
+            </>
+          )}
+          {!isLogin && (
+            <Button onClick={() => navigate("/login")} variant="contained" sx={{ background: '#5e81ac', color: '#ffffff', marginLeft: 2 }}>Login</Button>
+          )}
+        </Box>
       </Toolbar>
     </AppBar>
   );

@@ -205,4 +205,36 @@
   border-bottom: 4px solid #0ef; 
 }
 
+@media screen and (max-width: 600px) {
+  .navbar .MuiButton-root {
+    font-size: 1rem;
+    margin: 5px 0;
+  }
+  
+  .navbar .MuiButton-contained {
+    font-size: 1rem;
+    padding: 8px 16px;
+  }
 
+  .navbar .MuiIconButton-root {
+    margin-right: 5px;
+  }
+
+  .navbar .MuiTypography-root {
+    font-size: 1.5rem;
+  }
+
+  .navbar .MuiDrawer-paper {
+    background-color: #ffffff;
+  }
+
+  .navbar .MuiListItemButton-root {
+    padding: 12px 0;
+    text-align: center;
+  }
+
+  .navbar .MuiListItemText-primary {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+}
