@@ -181,12 +181,13 @@ const handleBlogAction = async (status) => {
           Save Draft
         </Button>
       </div>
-      <StyledFormBox>
+      <StyledFormBox
+       sx={{ width: { xs: "90%", sm: "75%", md: "55%" } }}>
         <Typography variant="h5" textAlign="center" fontWeight="bold" paddingBottom={0} paddingTop={0} color={theme.palette.text.primary}>
           Create A Blog
         </Typography>
         <InputLabel>Title</InputLabel>
-        <TextField name="title" value={inputs.title} onChange={handleChange} variant="outlined" required size="small" />
+        <TextField name="title"  fullWidth value={inputs.title} onChange={handleChange} variant="outlined" required size="small" />
 
         <InputLabel>Description</InputLabel>
         <div style={{ marginBottom: '12px', width: '100%' }}>
