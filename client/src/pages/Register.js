@@ -59,8 +59,8 @@ const Register = () => {
   return (
     <Grid
       container
+      sx={{ height: "100vh", flexDirection: { xs: "column", sm: "row" } }}
       style={{
-        height: "100vh",
         backgroundColor: "#f4f4f4",
       }}
     >
@@ -72,16 +72,18 @@ const Register = () => {
           backgroundImage: "url(/signup.jpg)",
           backgroundSize: "cover",
           backgroundPosition: "center",
+          height: { xs: "250px", sm: "100%" } 
         }}
       ></Grid>
       <Grid
         item
-        xs={6}
+        xs={12} sm={6} 
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
+          padding: { xs: 2, sm: 4 } 
         }}
       >
         <Paper
