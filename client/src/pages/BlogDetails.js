@@ -387,6 +387,7 @@ const BlogDetails = () => {
 
         <Box>
           <Typography variant="subtitle1" fontWeight="bold">
+            
             {blog?.user?.username || "Unknown Author"}
           </Typography>
           <Typography variant="body2" color="textSecondary">
@@ -450,10 +451,14 @@ const BlogDetails = () => {
   alt={rec.user?.username ?? "Unknown"}
 />
           <Box flexGrow={1}>
-            <Typography variant="subtitle1" fontWeight="bold">
+            <Typography variant="subtitle1" fontWeight="bold"
+             sx={{ color: theme.palette.mode === 'dark' ? "#fff" : "#000" }}
+>
               {rec.title}
             </Typography>
-            <Typography variant="caption" display="block">
+            <Typography variant="caption" display="block"
+             sx={{ color: theme.palette.mode === 'dark' ? "#bbb" : "#333" }}
+>
   {rec.user?.username ?? "Unknown"}
 </Typography>
 
