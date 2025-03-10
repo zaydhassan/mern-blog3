@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Grid, Paper, Typography, TextField, Button } from '@mui/material';
 import toast from "react-hot-toast";
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig';
@@ -16,65 +17,58 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      height: '85vh'
-    }}>
-      <div style={{
-        background: 'url("/forgot.jpg") no-repeat center center',
-        backgroundSize: 'cover'
-      }} />
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <div style={{
-          background: '#D9EAFD',
-          padding: '2rem',
-          borderRadius: '10px',
-          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          maxWidth: '400px',
-          width: '100%'
-        }}>
-          <h1 style={{ textAlign: 'center' }}>Reset Password</h1>
-          <div style={{ marginTop: '1rem' }}>
-            <div style={{ marginBottom: '3rem' }}>
-              <label style={{ marginBottom: '0.5rem', display: 'block', color: '#333' }}>Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  border: '1px solid #ccc',
-                  padding: '10px',
-                  borderRadius: '5px',
-                  width: '100%'
-                }}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
-            <button
-              onClick={handleResetPassword}
-              style={{
-                backgroundColor: '#0056b3',
-                color: 'white',
-                padding: '10px 20px',
-                borderRadius: '5px',
-                border: 'none',
-                cursor: 'pointer',
-                width: '100%',
-                fontSize: '18px'
-              }}
-            >
-              Send Reset Link
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <Grid 
+      container 
+      sx={{ height: "85vh", flexDirection: { xs: "column", sm: "row" } }}
+    >
+      {/* Image Section (Appears on Top for Mobile) */}
+      <Grid 
+        item 
+        xs={12} sm={6}  
+        sx={{ 
+          backgroundImage: "url(/forgot.jpg)", 
+          backgroundSize: "cover", 
+          backgroundPosition: "center",
+          height: { xs: "250px", sm: "100%" } 
+        }} 
+      />
+
+      {/* Form Section (Below Image on Mobile) */}
+      <Grid 
+        item 
+        xs={12} sm={6} 
+        sx={{ 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "center", 
+          padding: { xs: 2, sm: 4 } 
+        }}
+      >
+        <Paper sx={{ width: { xs: "90%", sm: "400px" }, padding: 4 }}>
+          <Typography variant="h4" sx={{ textAlign: "center", mb: 3 }}>
+            Reset Password
+          </Typography>
+          <TextField 
+            fullWidth 
+            label="Email Address" 
+            variant="outlined" 
+            margin="normal" 
+            required 
+            name="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <Button 
+            fullWidth 
+            variant="contained" 
+            sx={{ mt: 2, py: 1.5, fontSize: "16px", backgroundColor: "#0056b3" }}
+            onClick={handleResetPassword}
+          >
+            Send Reset Link
+          </Button>
+        </Paper>
+      </Grid>
+    </Grid>
   );
 };
 
