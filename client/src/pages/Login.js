@@ -5,6 +5,7 @@ import {
   Typography,
   TextField,
   Button,
+  Box,
   Grid,
   CssBaseline,
   IconButton,
@@ -86,27 +87,29 @@ const Login = () => {
   return (
     <Grid
       container
+      sx={{ height: "100vh", flexDirection: { xs: "column", sm: "row" } }}
+
       style={{
-        height: "100vh",
         backgroundColor: "#f4f4f4", 
       }}
     >
       <CssBaseline />
       <Grid
         item
-        xs={6}
+        xs={12} sm={6} 
         style={{
           backgroundImage: "url(/login.jpg)",
           backgroundSize: "cover",
           backgroundPosition: "center",
+          height: { xs: "250px", sm: "100%" } 
         }}
       ></Grid>
       <Grid
         item
-        xs={6}
+        xs={12} sm={6} 
         style={{
           display: "flex",
-          flexDirection: "column",
+          padding: { xs: 2, sm: 4 } ,
           alignItems: "center",
           justifyContent: "center",
         }}
@@ -129,8 +132,10 @@ const Login = () => {
             LOGIN
           </Typography>
           <div>
-      {showBanner && (
-        <NotificationBanner message={bannerMessage} showHand={showWavingHand} />
+          {showBanner && (
+        <Box sx={{ mb: 2 }}>
+          <NotificationBanner message={bannerMessage} showHand={showWavingHand} />
+        </Box>
       )}
           <form style={{ width: "100%" }} onSubmit={handleSubmit}>
             <TextField
