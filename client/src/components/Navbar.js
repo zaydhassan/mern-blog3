@@ -58,7 +58,7 @@ const Navbar = () => {
       }}
     >
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        {/* Mobile Menu Button */}
+        
         <IconButton 
           edge="start" 
           color="inherit" 
@@ -69,7 +69,6 @@ const Navbar = () => {
           <MenuIcon />
         </IconButton>
         
-        {/* Logo */}
         <IconButton 
           edge="start" 
           color="inherit" 
@@ -79,15 +78,13 @@ const Navbar = () => {
           <img src="polysia.jpeg" alt="Logo" style={{ height: '50px' }} />  
         </IconButton>
 
-        {/* Desktop Navigation */}
-        <Box sx={{ display: { xs: "none", md: "flex" }, gap: 2 }}>
-          <Button onClick={() => navigate("/")} color="inherit">Home</Button>
-          <Button onClick={() => navigate("/about")} color="inherit">About</Button>
-          <Button onClick={() => handleNavigation("/blogs")} color="inherit">Blogs</Button>
-          <Button onClick={() => navigate("/contact")} color="inherit">Contact</Button>
-        </Box>
+        <div style={{ flexGrow: 1, justifyContent: 'center', display: 'flex' }}>
+          <Button className={location.pathname === "/" ? "active" : ""} onClick={() => navigate("/")} color="inherit">Home</Button>
+          <Button className={location.pathname === "/about" ? "active" : ""} onClick={() => navigate("/about")} color="inherit">About</Button>
+          <Button className={location.pathname.startsWith("/blogs") ? "active" : ""} onClick={() => handleNavigation("/blogs")} color="inherit">Blogs</Button>
+          <Button className={location.pathname === "/contact" ? "active" : ""} onClick={() => navigate("/contact")} color="inherit">Contact</Button>
+        </div>
 
-        {/* Mobile Drawer */}
         <Drawer anchor="left" open={mobileOpen} onClose={handleDrawerToggle}>
           <Box sx={{ width: 250, display: "flex", flexDirection: "column", padding: 2 }}>
             <Button onClick={() => navigate("/")} color="inherit">Home</Button>
@@ -97,7 +94,6 @@ const Navbar = () => {
           </Box>
         </Drawer>
         
-        {/* User Profile & Theme Toggle */}
         <Box sx={{ display: "flex", alignItems: "center" }}>
           {isLogin && (
             <>
