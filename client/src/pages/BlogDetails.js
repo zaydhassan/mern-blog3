@@ -465,6 +465,7 @@ const BlogDetails = () => {
             <Typography variant="caption" color="gray">
               {moment(rec.created_at).format("MMM DD")}
             </Typography>
+            
           </Box>
           <CardMedia
             component="img"
