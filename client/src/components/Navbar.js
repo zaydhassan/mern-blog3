@@ -75,7 +75,7 @@ const Navbar = () => {
           onClick={() => navigate('/')} 
           sx={{ display: { xs: "none", md: "block" } }}
         >
-          <img src="polysia.jpeg" alt="Logo" style={{ height: '50px' }} />  
+          <img src="z.png" alt="Logo" style={{ height: '40px' }} />  
         </IconButton>
 
         <div style={{ flexGrow: 1, justifyContent: 'center', display: 'flex' }}>
