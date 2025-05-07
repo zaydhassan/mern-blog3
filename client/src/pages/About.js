@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography, Container, Grid, Box, useTheme } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInstagram, faYoutube, faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
+import { faInstagram, faGithub, faLinkedinIn } from "@fortawesome/free-brands-svg-icons";
 import { faGlobe } from "@fortawesome/free-solid-svg-icons"; 
 import { motion } from 'framer-motion';
 
@@ -96,16 +96,16 @@ const AboutPage = () => {
             transition={{ duration: 0.7 }}
             style={{ marginTop: 40, display: 'flex', justifyContent: 'center', gap: 20 }}
           >
-             <a href="https://polysia.github.io/Main-Website/" target="_blank" rel="noopener noreferrer" className="icon">
+             <a href="https://zaydupdatedportfolio.netlify.app/" target="_blank" rel="noopener noreferrer" className="icon">
               <FontAwesomeIcon icon={faGlobe} />
             </a>
-            <a href="https://www.youtube.com/@PolysiaTech" target="_blank" rel="noopener noreferrer" className="icon">
-              <FontAwesomeIcon icon={faYoutube} />
+            <a href="https://github.com/zaydhassan" target="_blank" rel="noopener noreferrer" className="icon">
+              <FontAwesomeIcon icon={faGithub} />
             </a>
-            <a href="https://www.linkedin.com/in/polysia-tech/" target="_blank" rel="noopener noreferrer" className="icon">
+            <a href="https://www.linkedin.com/in/zayd-hassan-a06105213/" target="_blank" rel="noopener noreferrer" className="icon">
               <FontAwesomeIcon icon={faLinkedinIn} />
             </a>
-            <a href="https://www.instagram.com/polysiatech/" target="_blank" rel="noopener noreferrer" className="icon">
+            <a href="https://www.instagram.com/_zayd_hassan_/?next=https%3A%2F%2Fwww.instagram.com%2Faccounts%2Fonetap%2F%3Fnext%3D%252F%26__coig_login%3D1" target="_blank" rel="noopener noreferrer" className="icon">
               <FontAwesomeIcon icon={faInstagram} />
             </a>
           </motion.div>
