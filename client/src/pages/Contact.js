@@ -103,11 +103,11 @@ export default function Contact() {
                     <List>
                         <ListItem>
                             <ListItemIcon><LocationOnIcon sx={{ color: '#FFFFFF' }} /></ListItemIcon>
-                            <ListItemText primary="Sector 78, Noida, UttarPradesh, India" />
+                            <ListItemText primary="abc 123, India" />
                         </ListItem>
                         <ListItem>
                             <ListItemIcon><EmailIcon sx={{ color: '#FFFFFF' }} /></ListItemIcon>
-                            <ListItemText primary="info@polysia.com" />
+                            <ListItemText primary="zaydthirteen@gmail.com" />
                         </ListItem>
                     </List>
                 </Box>
@@ -165,7 +165,7 @@ export default function Contact() {
                             sx={{
                                 input: {
                                   color: theme.palette.mode === "dark" ? "#FFFFFF" : "#000000", 
-                                  backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)", // Light grey in light mode
+                                  backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)",
                                   padding: "12px",
                                   borderRadius: "8px",
                                 },
@@ -194,7 +194,7 @@ export default function Contact() {
                             sx={{
                                 input: {
                                   color: theme.palette.mode === "dark" ? "#FFFFFF" : "#000000", 
-                                  backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)", // Light grey in light mode
+                                  backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.05)", 
                                   padding: "12px",
                                   borderRadius: "8px",
                                 },
